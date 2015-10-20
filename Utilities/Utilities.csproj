@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{149DA907-D73E-46B6-94AC-7E2037BD2B13}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Utilities</RootNamespace>
+    <AssemblyName>Utilities</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DotRas, Version=1.3.5166.33429, Culture=neutral, PublicKeyToken=b378f04384b7892a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\DotRas SDKs\v1.3\Libraries\NET20\WINXP\DotRas.dll</HintPath>
+    </Reference>
+    <Reference Include="LumiSoft.Net">
+      <HintPath>..\..\..\..\03 Library\VS\LumiSoft.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Config\AccountFactory.cs" />
+    <Compile Include="Config\Accounts.cs" />
+    <Compile Include="Config\DailConfig.cs" />
+    <Compile Include="Config\PayConfig.cs" />
+    <Compile Include="Config\SimulatorSettings.cs" />
+    <Compile Include="Log\ProjectListener.cs" />
+    <Compile Include="Processor\UIAccessProcessor.cs" />
+    <Compile Include="SMSReceivor\HttpTool.cs" />
+    <Compile Include="Utility\ADSLConnection.cs" />
+    <Compile Include="IMGReceivor\CheckImage.cs" />
+    <Compile Include="SMSReceivor\CheckPhone.cs" />
+    <Compile Include="Config\Configuration.cs" />
+    <Compile Include="Utility\ElementUtils.cs" />
+    <Compile Include="Utility\FetchMail.cs" />
+    <Compile Include="Utility\FileUtil.cs" />
+    <Compile Include="SMSReceivor\Http.cs" />
+    <Compile Include="SMSReceivor\HttpHelper.cs" />
+    <Compile Include="Utility\ImageUtility.cs" />
+    <Compile Include="Utility\MouseUtility.cs" />
+    <Compile Include="Utility\Process.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utility\RandomGenerator.cs" />
+    <Compile Include="Utility\Registor.cs" />
+    <Compile Include="Utility\ResourceManager.cs" />
+    <Compile Include="Utility\RSAConnection.cs" />
+    <Compile Include="IMGReceivor\RuoKuaiHttp.cs" />
+    <Compile Include="Utility\UIFrame.cs" />
+    <Compile Include="Utility\Utility.cs" />
+    <Compile Include="Utility\WebProxyUtility.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="MSHTML">
+      <Guid>{3050F1C5-98B5-11CF-BB82-00AA00BDCE0B}</Guid>
+      <VersionMajor>4</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <Private>True</Private>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
