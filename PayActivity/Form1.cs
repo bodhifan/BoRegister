@@ -49,7 +49,7 @@ namespace PayRegister
         bool isPasteFinished = true;
         bool beginToClickClearBtn = false;
 
-        DateTime beginTime;
+        TimeSpan totalTimes;
 
         public Form1()
         {
@@ -145,7 +145,7 @@ namespace PayRegister
         }
         private void button1_Click(object sender, EventArgs e)
         {
-            beginTime = DateTime.Now;
+            
             timer2.Start();
             Thread th = new Thread(new ThreadStart(BeginRegister));
             th.SetApartmentState(ApartmentState.STA);
@@ -259,18 +259,35 @@ namespace PayRegister
             try
             {
                 StreamWriter failAccount = new StreamWriter(@"失败小号.txt");
-                foreach (AccountEntity ae in failedEntity)
+
+                if (deadEntity.Count > 0)
                 {
-                    failAccount.WriteLine(ae.ToString());
+                    failAccount.WriteLine(string.Format("=============== {0} 个超过3次未激活成功===============", deadEntity.Count));
+                    foreach (AccountEntity ae in deadEntity)
+                    {
+                        failAccount.WriteLine(ae.ToString());
+                    }
                 }
-                foreach (AccountEntity ae in deadEntity)
+                if (failedEntity.Count > 0)
                 {
-                    failAccount.WriteLine(ae.ToString());
+                    failAccount.WriteLine(string.Format("=============== {0} 个激活失败 ===============", failedEntity.Count));
+                    foreach (AccountEntity ae in failedEntity)
+                    {
+                        failAccount.WriteLine(ae.ToString());
+                    }
                 }
-                while (entities.HasNext())
+
+                if (entities.Reminder() > 0)
                 {
-                    failAccount.WriteLine(entities.Next().ToString());
+                    failAccount.WriteLine(string.Format("===============剩余 {0} 个没有激活===============", entities.Reminder().ToString()));
+                    int oldIdx = entities.GetIndex();
+                    while (entities.HasNext())
+                    {
+                        failAccount.WriteLine(entities.Next().ToString());
+                    }
+                    entities.SetIndex(oldIdx);
                 }
+
                 failAccount.Flush();
                 failAccount.Close();
             }
@@ -1481,6 +1498,7 @@ namespace PayRegister
         }
         private void button2_Click(object sender, EventArgs e)
         {
+            timer2.Stop();
             processControlor.Stop();
             OutPutFailedAndDeadAccount();
         }
@@ -1688,8 +1706,9 @@ namespace PayRegister
 
         private void timer2_Tick(object sender, EventArgs e)
         {
-            TimeSpan temp = DateTime.Now.Subtract(beginTime);
-            labelTotalTime.Text = string.Format("{0}:{1}:{2}:{3}", temp.Days, temp.Hours, temp.Minutes, temp.Seconds);
+            totalTimes += new TimeSpan(0, 0, 1);
+            //TimeSpan temp = DateTime.Now.Subtract(beginTime);
+            labelTotalTime.Text = string.Format("{0}:{1}:{2}:{3}", totalTimes.Days, totalTimes.Hours, totalTimes.Minutes, totalTimes.Seconds);
         }
 
         private void button4_Click_2(object sender, EventArgs e)
@@ -1724,6 +1743,12 @@ namespace PayRegister
                 entities.SetIndex(index);
             }
 
+        }
+
+        private void button7_Click_1(object sender, EventArgs e)
+        {
+            string accoutn = AccountFactory.getInstance().getPwdRoles().GetRandomPassword();
+            MessageBox.Show(accoutn);
         }
     }
 }
