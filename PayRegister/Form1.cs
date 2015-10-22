@@ -653,8 +653,16 @@ namespace PayRegister
                 {
                     callingOnce = true;
                     IWebElement dragElement = driver.FindElement(By.XPath("//*[@id=\"_n1z\"]"));
-                    Actions action = new Actions(driver);
-                    action.DragAndDropToOffset(dragElement, 300, 0).Perform();
+                    IWebElement bkElement = driver.FindElement(By.XPath("//*[@id=\"_scale_text\"]"));
+                    Point domPnt = GetDomPosition();
+                    Point fromPnt = new Point(domPnt.X + dragElement.Location.X + dragElement.Size.Width / 2, domPnt.Y + dragElement.Location.Y + dragElement.Size.Height / 2);
+                    SetChromeForegroundWindow();
+                    MouseUtility.DragAndDown(fromPnt, new Point(fromPnt.X + 300, fromPnt.Y));
+                    //Point toPnt = new Point(bkElement.Size.Width - dragElement.Size.Width,0);
+                    //OutMsg("length:" + toPnt.X);
+                    //Actions action = new Actions(driver);
+                    //action.DragAndDropToOffset(dragElement, toPnt.X, 0).Perform();
+                    //action.Release();
 
                     OutMsg("drag done");
 

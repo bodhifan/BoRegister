@@ -83,6 +83,15 @@ namespace Utilities.Utility
             mouse_event(MOUSEEVENTF_LEFTUP | MOUSEEVENTF_ABSOLUTE, point.X, point.Y, 0, 0);
 
         }
+        public static void DragAndDown(Point point,Point toPnt)
+        {
+            SetCursorPos(point.X,point.Y);
+            mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_ABSOLUTE, point.X, point.Y, 0, 0);
+            MoveCursor(point, toPnt);
+            SetCursorPos(toPnt.X, toPnt.Y);
+            mouse_event(MOUSEEVENTF_LEFTUP | MOUSEEVENTF_ABSOLUTE, toPnt.X, toPnt.Y, 0, 0);
+
+        }
         public static void DoPaste()
         {
             keybd_event((byte)Keys.ControlKey, 0, 0, 0);//按下
