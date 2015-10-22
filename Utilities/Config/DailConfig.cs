@@ -14,11 +14,12 @@ namespace Utilities
         public string DAIL_WAITTING_TIME = "断网等待时间";
         public string NAME = "账号";
         public string PWD = "密码";
-
+        public string GAP_DAIL = "间隔(几次)拨号";
         public string dailName;
         public int waittingTime;
         public string userName;
         public string password;
+        public int dailGap;
         private static DailConfig instance = null;
 
         private static ADSLConnetion sinAsdl = null;
@@ -42,6 +43,7 @@ namespace Utilities
             ConfigFactory.getInstance().WriteString(SECTION_NAME_KEY, DAIL_WAITTING_TIME, waittingTime.ToString());
             ConfigFactory.getInstance().WriteString(SECTION_NAME_KEY, NAME, userName);
             ConfigFactory.getInstance().WriteString(SECTION_NAME_KEY, PWD, password);
+            ConfigFactory.getInstance().WriteInteger(SECTION_NAME_KEY, GAP_DAIL, dailGap);
         }
          public void Parse()
          {
@@ -49,6 +51,7 @@ namespace Utilities
              waittingTime = ConfigFactory.getInstance().ReadInteger(SECTION_NAME_KEY, DAIL_WAITTING_TIME, 3);
              userName = ConfigFactory.getInstance().ReadString(SECTION_NAME_KEY, NAME, "");
              password = ConfigFactory.getInstance().ReadString(SECTION_NAME_KEY, PWD, "");
+             dailGap = ConfigFactory.getInstance().ReadInteger(SECTION_NAME_KEY, GAP_DAIL, 5);
          }
 
         public void DisConnect()

@@ -72,37 +72,37 @@ namespace PayRegister
             // 定义处理流程
             processControlor.SetCondition(ExcuteCondition);
             processControlor.AddHandler(InitDriver);
-            processControlor.AddHandler(InputEmail);
-            processControlor.AddHandler(InputEmailPassword);
-            
-//             processControlor.AddHandler(CheckShowImageCheck);
+//             processControlor.AddHandler(InputEmail);
+//             processControlor.AddHandler(InputEmailPassword);
+//             
+// //             processControlor.AddHandler(CheckShowImageCheck);
+// // 
+// //             processControlor.AddHandler(SubmitImageCode);
 // 
-//             processControlor.AddHandler(SubmitImageCode);
-
-            processControlor.AddHandler(ClickLogin,1000);
-
-            processControlor.AddHandler(CheckLoginSuc,500);
-
-            processControlor.AddHandler(FillUserName);
-            processControlor.AddHandler(TrigeImageCodeShow,500);
-
-            processControlor.AddHandler(DumpImageCodeToFile,300);
-
-            processControlor.AddHandler(InputImageCode);
-            processControlor.AddHandler(ClickNext);
-            processControlor.AddHandler(ConfirmUserName);
-
-            processControlor.AddHandler(InputPhone);
-            processControlor.AddHandler(ClickPhoneNextBtn);
-
-            processControlor.AddHandler(CheckPhoneCodePage);
-            processControlor.AddHandler(InputPhoneCode,2000);
-            processControlor.AddHandler(ClickPhoneCodeNextBtn);
-            processControlor.AddHandler(CheckSuccessRegister,1000);
-            processControlor.AddHandler(CloseDriver,2000);
-            processControlor.AddHandler(ReconnectNetwork);
-            processControlor.MakeCycle();
-            processControlor.EndExcute("CloseDriver", 12);
+//             processControlor.AddHandler(ClickLogin,1000);
+// 
+//             processControlor.AddHandler(CheckLoginSuc,500);
+// 
+//             processControlor.AddHandler(FillUserName);
+//             processControlor.AddHandler(TrigeImageCodeShow,500);
+// 
+//             processControlor.AddHandler(DumpImageCodeToFile,300);
+// 
+//             processControlor.AddHandler(InputImageCode);
+//             processControlor.AddHandler(ClickNext);
+//             processControlor.AddHandler(ConfirmUserName);
+// 
+//             processControlor.AddHandler(InputPhone);
+//             processControlor.AddHandler(ClickPhoneNextBtn);
+// 
+//             processControlor.AddHandler(CheckPhoneCodePage);
+//             processControlor.AddHandler(InputPhoneCode,2000);
+//             processControlor.AddHandler(ClickPhoneCodeNextBtn);
+//             processControlor.AddHandler(CheckSuccessRegister,1000);
+//             processControlor.AddHandler(CloseDriver,2000);
+//             processControlor.AddHandler(ReconnectNetwork);
+//             processControlor.MakeCycle();
+//             processControlor.EndExcute("CloseDriver", 12);
 
           //  m_IoSys.InitSuperKeys();
             // 初始化设备类型
@@ -213,6 +213,13 @@ namespace PayRegister
                     {
                         chromeOptions.AddArgument("-incognito");
                     }
+
+                    Proxy proxy = new Proxy();
+                    string proxyString = "42.116.11.29:8000";
+                    proxy.HttpProxy = proxyString;
+                    proxy.SslProxy = proxyString;
+                    chromeOptions.AddAdditionalCapability("proxy", proxy);
+
   
 //                     DesiredCapabilities capabilities = DesiredCapabilities.Chrome();
 //                     capabilities.SetCapability("chrome.switches", "--incognito");
@@ -238,9 +245,7 @@ namespace PayRegister
                     }
 
                     // //reg.taobao.com/member/reg/h5/fill_email.htm
-                    driver.Navigate().GoToUrl("https://login.taobao.com/member/login.jhtml?newMini=true&from=tmall-wap&redirectURL=http%3A%2F%2Fwww.tmall.com");
-                    OutMsg("使用refer：" + ios6ua);
-                    OutMsg("URL:https://login.taobao.com/member/login.jhtml?newMini=true&from=tmall-wap&redirectURL=http%3A%2F%2Fwww.tmall.com");
+                    driver.Navigate().GoToUrl("http://proxies.site-digger.com/proxy-detect/");
                     SMSProxy.InitInstance(AccountFactory.getInstance().getSMSAcc().UserName,AccountFactory.getInstance().getSMSAcc().Passwd,
                          AccountFactory.getInstance().getSMSAcc().ProjID, AccountFactory.getInstance().getSMSAcc().PlatformName);
                     SMSProxy.AsynLogin();

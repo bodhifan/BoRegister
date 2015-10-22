@@ -20,6 +20,7 @@ using OpenQA.Selenium.Chrome;
 using System.Text.RegularExpressions;
 using OpenQA.Selenium.Interactions;
 using Utilities.Utility;
+using OpenQA.Selenium.Remote;
 
 namespace PayRegister
 {
@@ -31,11 +32,15 @@ namespace PayRegister
         EntitiesArray entities = EntitiesArray.GetInstance();
         AccountEntity curEntity = null;
 
+        List<AccountEntity> failedAccountList = new List<AccountEntity>();
+
         UIAccessProcessor processControlor = null;
         StreamWriter writer = null;
 
         int registerMode = 1;
 
+        // 注册成功的号的个数
+        int RegisterSucCnt = 0;
         public Form1()
         {
             InitializeComponent();
@@ -54,22 +59,37 @@ namespace PayRegister
             processControlor.AddHandler(CheckEmailStatus);
             processControlor.AddHandler(DumpImageCodeToFile);
             processControlor.AddHandler(InputImageCode);
-             processControlor.AddHandler(ClickNext);
-             processControlor.AddHandler(CheckReceviceStatus);
-             processControlor.AddHandler(ClickLoginButton);
-             processControlor.AddHandler(LoginEmail);
-             processControlor.AddHandler(FetchMail);
-             processControlor.AddHandler(GetRegisterAddr);
-             processControlor.AddHandler(SetPassword);
- 
-             processControlor.AddHandler(SetPayPassword); 
-             processControlor.AddHandler(SelectSecurityOption);
-             processControlor.AddHandler(CheckSuccessRegister); 
-             processControlor.AddHandler(CloseDriver);
-             processControlor.AddHandler(CloseDriverFork);
-             processControlor.MakeCycle();
+            processControlor.AddHandler(ClickNext);
+            processControlor.AddHandler(CheckReceviceStatus);
+            processControlor.AddHandler(ClickLoginButton);
+               processControlor.AddHandler(LoginEmail);
+               processControlor.AddHandler(FetchMail);
+               processControlor.AddHandler(GetRegisterAddr);
+               processControlor.AddHandler(SetPassword);
+   
+               processControlor.AddHandler(SetPayPassword); 
+               processControlor.AddHandler(SelectSecurityOption);
+               processControlor.AddHandler(CheckSuccessRegister); 
+               processControlor.AddHandler(CloseDriver);
+             processControlor.AddHandler(ReconnectNetwork);
              processControlor.EndExcute("CloseDriver", 15);
-//             processControlor.AddHandler(ReconnectNetwork);
+             processControlor.MakeCycle();
+
+            // 解析上次剩余的号
+            ParseAccount();
+        }
+
+        private void ParseAccount()
+        {  
+            // 剩余的号
+            entities.Clear();
+            List<AccountEntity> reminder = AccountEntity.DoUnserialize(@"reminder.bat");
+            entities.AddList(reminder);
+            TotalLabel.Text = entities.Reminder().ToString();
+
+            // 失败的号
+           failedAccountList = AccountEntity.DoUnserialize(@"failed.bat");
+           FailedLabel.Text = failedAccountList.Count.ToString();
         }
 
         void BeginRegister()
@@ -83,13 +103,14 @@ namespace PayRegister
         }
         private void button1_Click(object sender, EventArgs e)
         {
-
+            timer2.Start();
+            RegisterSucCnt = 0;
             Thread th = new Thread(new ThreadStart(BeginRegister));
             th.SetApartmentState(ApartmentState.STA);
             th.Start();
 
         }
-
+        int loopTimes = 0;
         private bool InitDriver(Object sender, Object param)
         {
             if (this.InvokeRequired)
@@ -100,8 +121,20 @@ namespace PayRegister
             {
                  if (!entities.HasNext())
                  {
-                     processControlor.Stop();
-                     return true;
+                     loopTimes++;
+                     if (loopTimes >= GlobalSettings.getInstance().loopTimes)
+                     {
+                         timer2.Stop();
+                         processControlor.Stop();
+                         return true;
+                     }
+                     else
+                     {
+                         entities.Clear();
+                         entities.AddList(failedAccountList);
+                         failedAccountList.Clear();
+                     }
+
                  }
                 try
                 {
@@ -122,18 +155,24 @@ namespace PayRegister
                     //                 options.BinaryLocation = @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe";
                     var ios6ua = "https://memberprod.alipay.com/account/reg/index.htm";
 
+//                     DesiredCapabilities capabilities = DesiredCapabilities.chrome();
+//                     capabilities.setCapability("chrome.switches", );
+//                     WebDriver driver = new ChromeDriver(capabilities);
+                    string proxyString = "61.223.163.178:8888";
                   var chromeOptions = new ChromeOptions();
-                  chromeOptions.AddArgument("--refer=" + ios6ua);
-                  
+                 
+                  //chromeOptions.AddArgument("--refer=" + ios6ua);
+                 // chromeOptions.AddArguments("--proxy-server="+proxyString);
                     driver = new ChromeDriver(driverService, chromeOptions);
-                   // driver = new ChromeDriver(".",options);
-                   // driver = new FirefoxDriver();
-                  //  driver.Manage().Cookies.DeleteAllCookies();
+
+
                     driver.Manage().Timeouts().ImplicitlyWait(new TimeSpan(0, 0, 5));
                     driver.Manage().Window.Size = new System.Drawing.Size(1000,driver.Manage().Window.Size.Height);
 
                     // //reg.taobao.com/member/reg/h5/fill_email.htm
                     driver.Navigate().GoToUrl("https://memberprod.alipay.com/account/reg/enterpriseIndex.htm");
+
+                   // driver.Navigate().GoToUrl("http://proxies.site-digger.com/proxy-detect/");
 
                 }
                 catch (System.Exception ex)
@@ -162,6 +201,8 @@ namespace PayRegister
                 if (curConfirmTimes > confirmTimes)
                 {
                     isRegisterSuc = false;
+                    callingOnce = true;
+                    curConfirmTimes = 0;
                     return true;
                 }
                 try
@@ -206,14 +247,25 @@ namespace PayRegister
             {
                  if (isRegisterSuc)
                  {
+                     curEntity.registerTime = DateTime.Now;
+                     curEntity.registerIP = currentIp;
                      OutMsg("注册成功：" + curEntity.ToString());
                      OutputSuccAccount();
+                     RegisterSucCnt++;
+                     SucLabel.Text = RegisterSucCnt.ToString();
                  }
                  else
                  {
                      OutMsg("注册失败：" + curEntity.ToString());
                      OutputFailedAccount();
+                     if (!isIgnore)
+                     {
+                         failedAccountList.Add(curEntity);
+                     }
+                     isIgnore = false;
+                     FailedLabel.Text = failedAccountList.Count.ToString();
                  }
+                 ReminderLabel.Text = entities.Reminder().ToString();
                  driver.Quit();
             }
             return true;
@@ -235,6 +287,7 @@ namespace PayRegister
             writer.Close();
         }
 
+        int dailCnt = 0;
         private bool ReconnectNetwork(Object sender, Object param)
         {
             if (this.InvokeRequired)
@@ -244,32 +297,37 @@ namespace PayRegister
             else
             {
                 callingOnce = true;
-                // 自动拨号
-                OutMsg("断线重拨，等待" + RegisterSettings.getInstance().waittingTimes.ToString() + "秒...");
-                RASDisplay ras = new RASDisplay();
-                ras.Disconnect();//断开连接
-                System.Threading.Thread.Sleep(RegisterSettings.getInstance().waittingTimes * 1000);
-                int rtn = ras.Connect("ADSL");
-                if (rtn == 0)
+                dailCnt++;
+                if (dailCnt % DailConfig.getInstance().dailGap == 0)
                 {
-                    OutMsg("重拨成功!");
+                    // 自动拨号
+                    OutMsg("断线重拨，等待" + DailConfig.getInstance().waittingTime.ToString() + "秒...");
+                    DailConfig.getInstance().DisConnect();
+                    System.Threading.Thread.Sleep(DailConfig.getInstance().waittingTime * 1000);
+                    int rtn = DailConfig.getInstance().Connect();
+                    if (rtn == 0)
+                    {
+                        OutMsg("重拨成功!");
+                    }
+                    else
+                    {
+                        OutMsg("重拨失败!,继续重拨...");
+                        callingOnce = false;
+                    }
+                    string temp = GetIP();
+                    if (temp.Equals(currentIp))
+                    {
+                        OutMsg("IP与上一次一样,继续重拨...");
+                        callingOnce = false;
+                    }
+                    if (!callingOnce)
+                    {
+                        return false;
+                    }
+                    currentIp = temp;
+                    dailCnt = 0;
                 }
-                else
-                {
-                    OutMsg("重拨失败!,继续重拨...");
-                    callingOnce = false;
-                }
-                string temp = GetIP();
-                if (temp.Equals(currentIp))
-                {
-                    OutMsg("IP与上一次一样,继续重拨...");
-                    callingOnce = false;
-                }
-                if (!callingOnce)
-                {
-                    return false;
-                }
-                currentIp = temp;
+                
                 AddrLabel.Text = "当前IP:" + currentIp;
             }
             return callingOnce;
@@ -291,7 +349,7 @@ namespace PayRegister
                 {
                 	// 验证码错误
                     CheckImageFactory.GetCheckImage().ReportError();
-                    processControlor.GotoHanlderUnit("DumpImageCodeToFile", 1000);
+                    processControlor.GotoHanlderUnit("CloseDriver", 1000);
                 }
                 
             }
@@ -319,6 +377,7 @@ namespace PayRegister
             }
             else
             {
+                callingOnce = true;
                 try
                 {
                     IWebElement confirmFrame = SwitchFrameByName("xbox-iframe");
@@ -456,6 +515,8 @@ namespace PayRegister
                 // 点击下一步
                 Thread.Sleep(500);
                 ClickElementByXpath("//*[@id=\"J-submit\"]");
+
+                curConfirmTimes = 0;
             }
             return true;
         }
@@ -608,6 +669,8 @@ namespace PayRegister
             return callingOnce;
 
         }
+
+        bool isIgnore = false;
         //CheckEmailStatus
         private bool CheckEmailStatus(Object sender, Object param)
         {
@@ -624,6 +687,7 @@ namespace PayRegister
                     if (dragElement.Text.Contains("已注册"))
                     {
                         OutMsg("改邮箱已经被注册");
+                        isIgnore = true;
                         processControlor.GotoHanlderUnit("CloseDriver", 1000);
                         return true;
                     }
@@ -675,6 +739,8 @@ namespace PayRegister
                     OutMsg("获取图片验证码失败");
                     return true;
                 }
+
+                OutMsg("返回坐标：" + coords);
                 int x = (int)(Convert.ToInt32(xy[0])/scaleX);
                 int y = (int)((Convert.ToInt32(xy[1])-30)/scaleY);
 
@@ -837,6 +903,7 @@ namespace PayRegister
         }
         private void button2_Click(object sender, EventArgs e)
         {
+            timer2.Stop();
             processControlor.Stop();
         }
         string currentIp;
@@ -884,7 +951,8 @@ namespace PayRegister
 
         private void button3_Click(object sender, EventArgs e)
         {
-            entities = EntitiesArray.GetInstance().Refresh();
+            entities.AddList(EntitiesArray.GetDatas());
+            TotalLabel.Text = entities.Reminder().ToString();
         }
 
         private void button4_Click(object sender, EventArgs e)
@@ -910,6 +978,49 @@ namespace PayRegister
             MouseUtility.SetCursorPos(X, Y);
             MouseUtility.ClickAtXY(new Point(X, Y));
             timer1.Stop();
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            GlobalSettings.getInstance().Save();
+            DailConfig.getInstance().Save();
+            DumpAccount();
+        }
+
+        private void DumpAccount()
+        {
+            // 剩余的号
+            List<AccountEntity> reminder = new List<AccountEntity>(entities.Reminder());
+            while (entities.HasNext())
+            {
+                reminder.Add(entities.Next());
+            }
+            AccountEntity.DoSerialize(reminder, @"reminder.bat");
+            AccountEntity.DoSerialize(failedAccountList, @"failed.bat");
+        }
+
+        private void btnClearAll_Click(object sender, EventArgs e)
+        {
+            entities.Clear();
+            TotalLabel.Text = "0";
+            failedAccountList.Clear();
+            FailedLabel.Text = "0";
+            SucLabel.Text = "0";
+            ReminderLabel.Text = "0";
+            loopTimes = 0;
+        }
+
+        private void btnClearFailed_Click(object sender, EventArgs e)
+        {
+            failedAccountList.Clear();
+            FailedLabel.Text = "0";
+        }
+
+        TimeSpan totalTimes = new TimeSpan();
+        private void timer2_Tick(object sender, EventArgs e)
+        {
+            totalTimes += new TimeSpan(0, 0, 1);
+            ConsumeTimesLabel.Text = string.Format("{0}:{1}:{2}:{3}", totalTimes.Days, totalTimes.Hours, totalTimes.Minutes, totalTimes.Seconds);
         }
 
     }

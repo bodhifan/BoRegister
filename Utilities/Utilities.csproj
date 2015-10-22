@@ -51,6 +51,7 @@
     <Compile Include="Config\AccountFactory.cs" />
     <Compile Include="Config\Accounts.cs" />
     <Compile Include="Config\DailConfig.cs" />
+    <Compile Include="Config\GlobalSettings.cs" />
     <Compile Include="Config\PayConfig.cs" />
     <Compile Include="Config\SimulatorSettings.cs" />
     <Compile Include="Log\ProjectListener.cs" />

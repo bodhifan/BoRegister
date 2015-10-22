@@ -9,20 +9,29 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Diagnostics;
 using System.Threading;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Utilities
 {
+
     // 账号信息
+    [Serializable]
     public class AccountEntity
     {
-      public string emailAccount; //邮件
-      public string emailPasswd;  //密码
-      public string phoneNum; //注册的手机号
-      public string acount; // 淘宝账号
-      public string passwd; // 密码
-      public string payPwd; // 支付宝密码
-      public string securityAns; // 密保
-      public int useCnt; //使用次数
+      public string emailAccount{get;set;}//邮件
+      public string emailPasswd{get;set;}  //密码
+      public string phoneNum { get; set; }  //注册的手机号
+      public string acount { get; set; }  // 淘宝账号
+      public string passwd { get; set; }  // 密码
+      public string payPwd { get; set; }  // 支付宝密码
+      public string securityAns { get; set; }  // 密保
+      public int useCnt { get; set; } //使用次数
+      [NonSerialized]
+      public DateTime registerTime;// 注册时间
+      [NonSerialized]
+      public TimeSpan registerConsume;// 注册耗时
+      [NonSerialized]
+      public string registerIP;// 注册耗时
       public AccountEntity()
       {
           useCnt = 0;
@@ -36,11 +45,36 @@ namespace Utilities
       }
       public override string ToString()
       {
-          return string.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}",emailAccount,emailPasswd,phoneNum,acount,passwd,payPwd,securityAns);
+          return string.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}|{7}|{8}",emailAccount,emailPasswd,phoneNum,acount,passwd,payPwd,securityAns,string.Format("{0}-{1}-{2}-{3}:{4}",registerTime.Month,
+              registerTime.Day,registerTime.Hour,registerTime.Minute,registerTime.Second),registerIP);
       }
       public string ToShortString()
       {
           return acount + "|" + passwd;
+      }
+
+      // 序列化
+      public static void DoSerialize(List<AccountEntity> list, string path)
+      {
+          FileStream fs = new FileStream(path, FileMode.Create);
+          BinaryFormatter bf = new BinaryFormatter();
+          bf.Serialize(fs, list);
+          fs.Close();
+      }
+      // 反序列化
+      public static List<AccountEntity> DoUnserialize(string path)
+      {
+          List<AccountEntity> rntList = new List<AccountEntity>();
+          if (!File.Exists(path))
+          {
+              return rntList;
+          }
+          FileStream fs = new FileStream(path, FileMode.Open);
+          BinaryFormatter bf = new BinaryFormatter();
+          rntList = bf.Deserialize(fs) as List<AccountEntity>;
+          fs.Close();
+
+          return rntList;
       }
     }
 
@@ -55,7 +89,7 @@ namespace Utilities
             mEntities = new List<AccountEntity>();
             index = 0;
             // 测试数据
-            GetDatas();
+            mEntities = GetDatas();
         }
 
 
@@ -109,8 +143,9 @@ namespace Utilities
         {
             return mEntities.Count;
         }
-        private void GetDatas()
+        public static List<AccountEntity>  GetDatas()
         {
+            List<AccountEntity> rntList = new List<AccountEntity>();
             TxtFiles emailTxt = new TxtFiles(Config.PATH_OF_EMAILS);
             string[] allLines = emailTxt.ReadAllLines();
             List<string> lineList = new List<string>();
@@ -129,15 +164,16 @@ namespace Utilities
                 AccountEntity ae = new AccountEntity();
                 ae.emailAccount = accounts[0].Trim();
                 ae.emailPasswd = accounts[1].Trim();
-                mEntities.Add(ae);
+                rntList.Add(ae);
                 lineList.Add(str.Trim());
             }
+            return rntList;
         }
         public EntitiesArray Refresh()
         {
             mEntities.Clear();
             index = 0;
-            GetDatas();
+            mEntities = GetDatas();
             return this;
         }
         ~EntitiesArray()

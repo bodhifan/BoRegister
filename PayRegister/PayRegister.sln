@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PayRegister", "PayRegister.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utilities", "..\Utilities\Utilities.csproj", "{149DA907-D73E-46B6-94AC-7E2037BD2B13}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup1", "..\Setup1\Setup1.vdproj", "{80D186F0-702E-4C79-A6AB-D31C2F2E96E0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,12 @@ Global
 		{149DA907-D73E-46B6-94AC-7E2037BD2B13}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{149DA907-D73E-46B6-94AC-7E2037BD2B13}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{149DA907-D73E-46B6-94AC-7E2037BD2B13}.Release|x86.ActiveCfg = Release|Any CPU
+		{80D186F0-702E-4C79-A6AB-D31C2F2E96E0}.Debug|Any CPU.ActiveCfg = Debug
+		{80D186F0-702E-4C79-A6AB-D31C2F2E96E0}.Debug|Mixed Platforms.ActiveCfg = Debug
+		{80D186F0-702E-4C79-A6AB-D31C2F2E96E0}.Debug|x86.ActiveCfg = Debug
+		{80D186F0-702E-4C79-A6AB-D31C2F2E96E0}.Release|Any CPU.ActiveCfg = Release
+		{80D186F0-702E-4C79-A6AB-D31C2F2E96E0}.Release|Mixed Platforms.ActiveCfg = Release
+		{80D186F0-702E-4C79-A6AB-D31C2F2E96E0}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
