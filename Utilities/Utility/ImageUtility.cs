@@ -22,5 +22,25 @@ namespace Utilities
             img1.Dispose();
             img2.Dispose();
         }
+
+        /// <summary>
+        /// 抓取屏幕(层叠的窗口)
+        /// </summary>
+        /// <param name="x">左上角的横坐标</param>
+        /// <param name="y">左上角的纵坐标</param>
+        /// <param name="width">抓取宽度</param>
+        /// <param name="height">抓取高度</param>
+        /// <returns></returns>
+        public static Bitmap CaptureScreen(int x, int y, int width, int height)
+        {
+            Bitmap bmp = new Bitmap(width, height);
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                g.CopyFromScreen(new Point(x, y), new Point(0, 0), bmp.Size);
+                g.Dispose();
+            }
+            //bit.Save(@"capture2.png");
+            return bmp;
+        }
     }
 }

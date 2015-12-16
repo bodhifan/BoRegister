@@ -12,6 +12,7 @@ using System.Drawing.Imaging;
 using System.Threading;
 using Utilities.PayConfig;
 using Utilities.Factory;
+using System.Diagnostics;
 
 namespace Utilities
 {
@@ -232,11 +233,12 @@ namespace Utilities
            accountInfo.Clear();
            accountInfo.Add("username", user);
            accountInfo.Add("password", passwd);
-           string httpResult = RuoKuaiHttp.Post("http://api.ruokuai.com/info.xml", accountInfo);
+           string httpResult;
 
            XmlDocument xmlDoc = new XmlDocument();
            try
            {
+               httpResult = RuoKuaiHttp.Post("http://api.ruokuai.com/info.xml", accountInfo);
                xmlDoc.LoadXml(httpResult);
            }
            catch
@@ -274,7 +276,7 @@ namespace Utilities
            accountInfo.Add("username",userName);
            accountInfo.Add("password",passwd); 
            accountInfo.Add("typeid",codeType.ToString()); 
-           accountInfo.Add("timeout","90");
+           accountInfo.Add("timeout","60");
            accountInfo.Add("softid",softid); 
            accountInfo.Add("softkey",softkey);
 
@@ -291,11 +293,12 @@ namespace Utilities
                    ms.Flush();
                }
 
-               string httpResult = RuoKuaiHttp.Post("http://api.ruokuai.com/create.xml", accountInfo, data);
+               string httpResult;
 
                XmlDocument xmlDoc = new XmlDocument();
                try
                {
+                   httpResult = RuoKuaiHttp.Post("http://api.ruokuai.com/create.xml", accountInfo, data);
                    xmlDoc.LoadXml(httpResult);
                }
                catch
@@ -449,8 +452,14 @@ namespace Utilities
                    default:
                        break;
                }
-               if(checkImg != null)
-                   checkImg.Login(AccountFactory.getInstance().getImageCodeAcc().UserName, AccountFactory.getInstance().getImageCodeAcc().Passwd);
+               
+           }
+
+           if (checkImg != null)
+           {
+
+              checkImg.Login(AccountFactory.getInstance().getImageCodeAcc().UserName, AccountFactory.getInstance().getImageCodeAcc().Passwd);
+              
            }
            return checkImg;
         }
@@ -462,12 +471,29 @@ namespace Utilities
         }
         public static void LoginAsyn()
         {
+            checkImg = null;
             AsynThread = new System.Threading.Thread(new ThreadStart(Login));
             AsynThread.Start();
         }
         public static void Login()
         {
-            GetCheckImage();
+            do 
+            {
+                try
+                {
+                    GetCheckImage();
+                }
+                catch (System.Exception ex)
+                {
+                    checkImg = null;
+                    Trace.WriteLine("登录 图片验证码失败，重新登录" + ex.StackTrace);
+                    Thread.Sleep(1000);
+                }
+                
+
+            } while (checkImg == null || !checkImg.IsLoginFinshed());
+            Trace.WriteLine("登录 图片验证码 成功");
+            
         }
     }
 }

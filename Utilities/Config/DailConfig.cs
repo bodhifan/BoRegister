@@ -47,7 +47,7 @@ namespace Utilities
         }
          public void Parse()
          {
-             dailName = ConfigFactory.getInstance().ReadString(SECTION_NAME_KEY, DAIL_NAME, SinASDL.GetASDLNames()[0]);
+             dailName = ConfigFactory.getInstance().ReadString(SECTION_NAME_KEY, DAIL_NAME, "ADSL");
              waittingTime = ConfigFactory.getInstance().ReadInteger(SECTION_NAME_KEY, DAIL_WAITTING_TIME, 3);
              userName = ConfigFactory.getInstance().ReadString(SECTION_NAME_KEY, NAME, "");
              password = ConfigFactory.getInstance().ReadString(SECTION_NAME_KEY, PWD, "");

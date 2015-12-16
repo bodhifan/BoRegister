@@ -49,19 +49,40 @@
             this.totalLabel = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.chNeedNewStart = new System.Windows.Forms.CheckBox();
+            this.btnHalfFinish = new System.Windows.Forms.Button();
+            this.chHalfAuto = new System.Windows.Forms.CheckBox();
+            this.btnDeadLoop = new System.Windows.Forms.Button();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.radioBtnB = new System.Windows.Forms.RadioButton();
+            this.radioBtnC = new System.Windows.Forms.RadioButton();
+            this.btnClearFailed = new System.Windows.Forms.Button();
+            this.btnClearAll = new System.Windows.Forms.Button();
+            this.btnReload = new System.Windows.Forms.Button();
+            this.chUseVPN = new System.Windows.Forms.CheckBox();
             this.chUseMode = new System.Windows.Forms.CheckBox();
             this.chMode = new System.Windows.Forms.CheckBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.btnReleaseAllPhones = new System.Windows.Forms.Button();
+            this.btnAddIgnore = new System.Windows.Forms.Button();
+            this.btnGetMessage = new System.Windows.Forms.Button();
+            this.btnGetPhoneNumber = new System.Windows.Forms.Button();
+            this.btnExportDead = new System.Windows.Forms.Button();
+            this.button8 = new System.Windows.Forms.Button();
+            this.button7 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
             this.btnLoginSMS = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.button6 = new System.Windows.Forms.Button();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.btnVPNState = new System.Windows.Forms.Button();
+            this.btnDisconnect = new System.Windows.Forms.Button();
+            this.btnLogin = new System.Windows.Forms.Button();
             this.statusBox = new System.Windows.Forms.RichTextBox();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.timer2 = new System.Windows.Forms.Timer(this.components);
-            this.button7 = new System.Windows.Forms.Button();
+            this.btnTestNetwork = new System.Windows.Forms.Button();
+            this.button9 = new System.Windows.Forms.Button();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -73,12 +94,14 @@
             this.splitContainer2.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            this.tabPage3.SuspendLayout();
             this.SuspendLayout();
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(80, 79);
+            this.button1.Location = new System.Drawing.Point(8, 79);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(99, 42);
             this.button1.TabIndex = 0;
@@ -88,7 +111,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(80, 137);
+            this.button2.Location = new System.Drawing.Point(129, 79);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(99, 42);
             this.button2.TabIndex = 1;
@@ -283,6 +306,7 @@
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
@@ -292,7 +316,14 @@
             // 
             // tabPage1
             // 
-            this.tabPage1.Controls.Add(this.chNeedNewStart);
+            this.tabPage1.Controls.Add(this.btnHalfFinish);
+            this.tabPage1.Controls.Add(this.chHalfAuto);
+            this.tabPage1.Controls.Add(this.btnDeadLoop);
+            this.tabPage1.Controls.Add(this.groupBox1);
+            this.tabPage1.Controls.Add(this.btnClearFailed);
+            this.tabPage1.Controls.Add(this.btnClearAll);
+            this.tabPage1.Controls.Add(this.btnReload);
+            this.tabPage1.Controls.Add(this.chUseVPN);
             this.tabPage1.Controls.Add(this.chUseMode);
             this.tabPage1.Controls.Add(this.chMode);
             this.tabPage1.Controls.Add(this.button2);
@@ -305,15 +336,110 @@
             this.tabPage1.Text = "自动版";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // chNeedNewStart
+            // btnHalfFinish
             // 
-            this.chNeedNewStart.AutoSize = true;
-            this.chNeedNewStart.Location = new System.Drawing.Point(22, 40);
-            this.chNeedNewStart.Name = "chNeedNewStart";
-            this.chNeedNewStart.Size = new System.Drawing.Size(48, 16);
-            this.chNeedNewStart.TabIndex = 4;
-            this.chNeedNewStart.Text = "重置";
-            this.chNeedNewStart.UseVisualStyleBackColor = true;
+            this.btnHalfFinish.Location = new System.Drawing.Point(14, 225);
+            this.btnHalfFinish.Name = "btnHalfFinish";
+            this.btnHalfFinish.Size = new System.Drawing.Size(99, 32);
+            this.btnHalfFinish.TabIndex = 16;
+            this.btnHalfFinish.Text = "输入完成";
+            this.btnHalfFinish.UseVisualStyleBackColor = true;
+            this.btnHalfFinish.Click += new System.EventHandler(this.btnHalfFinish_Click);
+            // 
+            // chHalfAuto
+            // 
+            this.chHalfAuto.AutoSize = true;
+            this.chHalfAuto.Location = new System.Drawing.Point(144, 40);
+            this.chHalfAuto.Name = "chHalfAuto";
+            this.chHalfAuto.Size = new System.Drawing.Size(84, 16);
+            this.chHalfAuto.TabIndex = 15;
+            this.chHalfAuto.Text = "半自动注册";
+            this.chHalfAuto.UseVisualStyleBackColor = true;
+            // 
+            // btnDeadLoop
+            // 
+            this.btnDeadLoop.Location = new System.Drawing.Point(125, 180);
+            this.btnDeadLoop.Name = "btnDeadLoop";
+            this.btnDeadLoop.Size = new System.Drawing.Size(99, 32);
+            this.btnDeadLoop.TabIndex = 14;
+            this.btnDeadLoop.Text = "循环死号";
+            this.btnDeadLoop.UseVisualStyleBackColor = true;
+            this.btnDeadLoop.Click += new System.EventHandler(this.btnDeadLoop_Click);
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.radioBtnB);
+            this.groupBox1.Controls.Add(this.radioBtnC);
+            this.groupBox1.Location = new System.Drawing.Point(8, 267);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(226, 63);
+            this.groupBox1.TabIndex = 13;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "IP切换规则";
+            // 
+            // radioBtnB
+            // 
+            this.radioBtnB.AutoSize = true;
+            this.radioBtnB.Location = new System.Drawing.Point(21, 28);
+            this.radioBtnB.Name = "radioBtnB";
+            this.radioBtnB.Size = new System.Drawing.Size(65, 16);
+            this.radioBtnB.TabIndex = 11;
+            this.radioBtnB.Tag = "2";
+            this.radioBtnB.Text = "B段地址";
+            this.radioBtnB.UseVisualStyleBackColor = true;
+            // 
+            // radioBtnC
+            // 
+            this.radioBtnC.AutoSize = true;
+            this.radioBtnC.Checked = true;
+            this.radioBtnC.Location = new System.Drawing.Point(136, 28);
+            this.radioBtnC.Name = "radioBtnC";
+            this.radioBtnC.Size = new System.Drawing.Size(65, 16);
+            this.radioBtnC.TabIndex = 10;
+            this.radioBtnC.TabStop = true;
+            this.radioBtnC.Tag = "3";
+            this.radioBtnC.Text = "C段地址";
+            this.radioBtnC.UseVisualStyleBackColor = true;
+            // 
+            // btnClearFailed
+            // 
+            this.btnClearFailed.Location = new System.Drawing.Point(125, 141);
+            this.btnClearFailed.Name = "btnClearFailed";
+            this.btnClearFailed.Size = new System.Drawing.Size(99, 32);
+            this.btnClearFailed.TabIndex = 8;
+            this.btnClearFailed.Text = "清理失败";
+            this.btnClearFailed.UseVisualStyleBackColor = true;
+            this.btnClearFailed.Click += new System.EventHandler(this.btnClearFailed_Click);
+            // 
+            // btnClearAll
+            // 
+            this.btnClearAll.Location = new System.Drawing.Point(14, 180);
+            this.btnClearAll.Name = "btnClearAll";
+            this.btnClearAll.Size = new System.Drawing.Size(99, 32);
+            this.btnClearAll.TabIndex = 7;
+            this.btnClearAll.Text = "清理所有";
+            this.btnClearAll.UseVisualStyleBackColor = true;
+            this.btnClearAll.Click += new System.EventHandler(this.btnClearAll_Click);
+            // 
+            // btnReload
+            // 
+            this.btnReload.Location = new System.Drawing.Point(14, 138);
+            this.btnReload.Name = "btnReload";
+            this.btnReload.Size = new System.Drawing.Size(99, 32);
+            this.btnReload.TabIndex = 6;
+            this.btnReload.Text = "重新加载";
+            this.btnReload.UseVisualStyleBackColor = true;
+            this.btnReload.Click += new System.EventHandler(this.btnReload_Click);
+            // 
+            // chUseVPN
+            // 
+            this.chUseVPN.AutoSize = true;
+            this.chUseVPN.Location = new System.Drawing.Point(22, 40);
+            this.chUseVPN.Name = "chUseVPN";
+            this.chUseVPN.Size = new System.Drawing.Size(66, 16);
+            this.chUseVPN.TabIndex = 4;
+            this.chUseVPN.Text = "使用VPN";
+            this.chUseVPN.UseVisualStyleBackColor = true;
             // 
             // chUseMode
             // 
@@ -337,6 +463,12 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.btnReleaseAllPhones);
+            this.tabPage2.Controls.Add(this.btnAddIgnore);
+            this.tabPage2.Controls.Add(this.btnGetMessage);
+            this.tabPage2.Controls.Add(this.btnGetPhoneNumber);
+            this.tabPage2.Controls.Add(this.btnExportDead);
+            this.tabPage2.Controls.Add(this.button8);
             this.tabPage2.Controls.Add(this.button7);
             this.tabPage2.Controls.Add(this.button5);
             this.tabPage2.Controls.Add(this.button4);
@@ -351,9 +483,79 @@
             this.tabPage2.Text = "手动版";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // btnReleaseAllPhones
+            // 
+            this.btnReleaseAllPhones.Location = new System.Drawing.Point(129, 308);
+            this.btnReleaseAllPhones.Name = "btnReleaseAllPhones";
+            this.btnReleaseAllPhones.Size = new System.Drawing.Size(99, 32);
+            this.btnReleaseAllPhones.TabIndex = 12;
+            this.btnReleaseAllPhones.Text = "释放所有电话号码";
+            this.btnReleaseAllPhones.UseVisualStyleBackColor = true;
+            this.btnReleaseAllPhones.Click += new System.EventHandler(this.btnReleaseAllPhones_Click);
+            // 
+            // btnAddIgnore
+            // 
+            this.btnAddIgnore.Location = new System.Drawing.Point(129, 265);
+            this.btnAddIgnore.Name = "btnAddIgnore";
+            this.btnAddIgnore.Size = new System.Drawing.Size(99, 32);
+            this.btnAddIgnore.TabIndex = 11;
+            this.btnAddIgnore.Text = "加黑当前电话号码";
+            this.btnAddIgnore.UseVisualStyleBackColor = true;
+            this.btnAddIgnore.Click += new System.EventHandler(this.btnAddIgnore_Click);
+            // 
+            // btnGetMessage
+            // 
+            this.btnGetMessage.Location = new System.Drawing.Point(8, 308);
+            this.btnGetMessage.Name = "btnGetMessage";
+            this.btnGetMessage.Size = new System.Drawing.Size(99, 32);
+            this.btnGetMessage.TabIndex = 10;
+            this.btnGetMessage.Text = "获取短信验证码";
+            this.btnGetMessage.UseVisualStyleBackColor = true;
+            this.btnGetMessage.Click += new System.EventHandler(this.btnGetMessage_Click);
+            // 
+            // btnGetPhoneNumber
+            // 
+            this.btnGetPhoneNumber.Location = new System.Drawing.Point(8, 267);
+            this.btnGetPhoneNumber.Name = "btnGetPhoneNumber";
+            this.btnGetPhoneNumber.Size = new System.Drawing.Size(99, 32);
+            this.btnGetPhoneNumber.TabIndex = 9;
+            this.btnGetPhoneNumber.Text = "获取电话号码";
+            this.btnGetPhoneNumber.UseVisualStyleBackColor = true;
+            this.btnGetPhoneNumber.Click += new System.EventHandler(this.btnGetPhoneNumber_Click);
+            // 
+            // btnExportDead
+            // 
+            this.btnExportDead.Location = new System.Drawing.Point(129, 176);
+            this.btnExportDead.Name = "btnExportDead";
+            this.btnExportDead.Size = new System.Drawing.Size(99, 32);
+            this.btnExportDead.TabIndex = 8;
+            this.btnExportDead.Text = "导出死号";
+            this.btnExportDead.UseVisualStyleBackColor = true;
+            this.btnExportDead.Click += new System.EventHandler(this.btnExportDead_Click);
+            // 
+            // button8
+            // 
+            this.button8.Location = new System.Drawing.Point(8, 124);
+            this.button8.Name = "button8";
+            this.button8.Size = new System.Drawing.Size(99, 32);
+            this.button8.TabIndex = 7;
+            this.button8.Text = "导出IP段";
+            this.button8.UseVisualStyleBackColor = true;
+            this.button8.Click += new System.EventHandler(this.button6_Click);
+            // 
+            // button7
+            // 
+            this.button7.Location = new System.Drawing.Point(129, 124);
+            this.button7.Name = "button7";
+            this.button7.Size = new System.Drawing.Size(99, 32);
+            this.button7.TabIndex = 6;
+            this.button7.Text = "获取随机账号";
+            this.button7.UseVisualStyleBackColor = true;
+            this.button7.Click += new System.EventHandler(this.button7_Click_1);
+            // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(8, 124);
+            this.button5.Location = new System.Drawing.Point(8, 72);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(99, 32);
             this.button5.TabIndex = 5;
@@ -373,7 +575,7 @@
             // 
             // btnLoginSMS
             // 
-            this.btnLoginSMS.Location = new System.Drawing.Point(8, 75);
+            this.btnLoginSMS.Location = new System.Drawing.Point(8, 224);
             this.btnLoginSMS.Name = "btnLoginSMS";
             this.btnLoginSMS.Size = new System.Drawing.Size(99, 32);
             this.btnLoginSMS.TabIndex = 3;
@@ -401,6 +603,50 @@
             this.button6.UseVisualStyleBackColor = true;
             this.button6.Click += new System.EventHandler(this.button6_Click_1);
             // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.button9);
+            this.tabPage3.Controls.Add(this.btnTestNetwork);
+            this.tabPage3.Controls.Add(this.btnVPNState);
+            this.tabPage3.Controls.Add(this.btnDisconnect);
+            this.tabPage3.Controls.Add(this.btnLogin);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Size = new System.Drawing.Size(247, 346);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "VPN";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // btnVPNState
+            // 
+            this.btnVPNState.Location = new System.Drawing.Point(134, 290);
+            this.btnVPNState.Name = "btnVPNState";
+            this.btnVPNState.Size = new System.Drawing.Size(99, 32);
+            this.btnVPNState.TabIndex = 8;
+            this.btnVPNState.Text = "当前状态（记事本）";
+            this.btnVPNState.UseVisualStyleBackColor = true;
+            this.btnVPNState.Click += new System.EventHandler(this.btnVPNState_Click);
+            // 
+            // btnDisconnect
+            // 
+            this.btnDisconnect.Location = new System.Drawing.Point(134, 61);
+            this.btnDisconnect.Name = "btnDisconnect";
+            this.btnDisconnect.Size = new System.Drawing.Size(99, 32);
+            this.btnDisconnect.TabIndex = 7;
+            this.btnDisconnect.Text = "断开";
+            this.btnDisconnect.UseVisualStyleBackColor = true;
+            this.btnDisconnect.Click += new System.EventHandler(this.btnDisconnect_Click);
+            // 
+            // btnLogin
+            // 
+            this.btnLogin.Location = new System.Drawing.Point(18, 61);
+            this.btnLogin.Name = "btnLogin";
+            this.btnLogin.Size = new System.Drawing.Size(99, 32);
+            this.btnLogin.TabIndex = 6;
+            this.btnLogin.Text = "登录";
+            this.btnLogin.UseVisualStyleBackColor = true;
+            this.btnLogin.Click += new System.EventHandler(this.btnLogin_Click);
+            // 
             // statusBox
             // 
             this.statusBox.BackColor = System.Drawing.SystemColors.Info;
@@ -420,15 +666,25 @@
             this.timer2.Interval = 1000;
             this.timer2.Tick += new System.EventHandler(this.timer2_Tick);
             // 
-            // button7
+            // btnTestNetwork
             // 
-            this.button7.Location = new System.Drawing.Point(129, 124);
-            this.button7.Name = "button7";
-            this.button7.Size = new System.Drawing.Size(99, 32);
-            this.button7.TabIndex = 6;
-            this.button7.Text = "获取随机账号";
-            this.button7.UseVisualStyleBackColor = true;
-            this.button7.Click += new System.EventHandler(this.button7_Click_1);
+            this.btnTestNetwork.Location = new System.Drawing.Point(18, 182);
+            this.btnTestNetwork.Name = "btnTestNetwork";
+            this.btnTestNetwork.Size = new System.Drawing.Size(99, 32);
+            this.btnTestNetwork.TabIndex = 9;
+            this.btnTestNetwork.Text = "测试网速";
+            this.btnTestNetwork.UseVisualStyleBackColor = true;
+            this.btnTestNetwork.Click += new System.EventHandler(this.btnTestNetwork_Click);
+            // 
+            // button9
+            // 
+            this.button9.Location = new System.Drawing.Point(18, 122);
+            this.button9.Name = "button9";
+            this.button9.Size = new System.Drawing.Size(99, 32);
+            this.button9.TabIndex = 10;
+            this.button9.Text = "当前状态";
+            this.button9.UseVisualStyleBackColor = true;
+            this.button9.Click += new System.EventHandler(this.button9_Click);
             // 
             // Form1
             // 
@@ -437,7 +693,7 @@
             this.ClientSize = new System.Drawing.Size(543, 571);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.statusStrip1);
-            this.Location = new System.Drawing.Point(1000, 0);
+            this.Location = new System.Drawing.Point(800, 0);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "Form1";
@@ -457,7 +713,10 @@
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.tabPage2.ResumeLayout(false);
+            this.tabPage3.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -491,13 +750,34 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label labDead;
         private System.Windows.Forms.Button btnLoginSMS;
-        private System.Windows.Forms.CheckBox chNeedNewStart;
+        private System.Windows.Forms.CheckBox chUseVPN;
         private System.Windows.Forms.Label labelTotalTime;
         private System.Windows.Forms.Timer timer2;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.Button button7;
+        private System.Windows.Forms.Button btnClearFailed;
+        private System.Windows.Forms.Button btnClearAll;
+        private System.Windows.Forms.Button btnReload;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.RadioButton radioBtnB;
+        private System.Windows.Forms.RadioButton radioBtnC;
+        private System.Windows.Forms.Button button8;
+        private System.Windows.Forms.Button btnDeadLoop;
+        private System.Windows.Forms.Button btnExportDead;
+        private System.Windows.Forms.CheckBox chHalfAuto;
+        private System.Windows.Forms.Button btnHalfFinish;
+        private System.Windows.Forms.Button btnAddIgnore;
+        private System.Windows.Forms.Button btnGetMessage;
+        private System.Windows.Forms.Button btnGetPhoneNumber;
+        private System.Windows.Forms.Button btnReleaseAllPhones;
+        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.Button btnDisconnect;
+        private System.Windows.Forms.Button btnLogin;
+        private System.Windows.Forms.Button btnVPNState;
+        private System.Windows.Forms.Button btnTestNetwork;
+        private System.Windows.Forms.Button button9;
     }
 }
 

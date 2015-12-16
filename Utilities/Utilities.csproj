@@ -37,6 +37,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\DotRas SDKs\v1.3\Libraries\NET20\WINXP\DotRas.dll</HintPath>
     </Reference>
+    <Reference Include="InputSimulator">
+      <HintPath>..\Lib\InputSimulator.dll</HintPath>
+    </Reference>
     <Reference Include="LumiSoft.Net">
       <HintPath>..\..\..\..\03 Library\VS\LumiSoft.Net.dll</HintPath>
     </Reference>
@@ -57,6 +60,10 @@
     <Compile Include="Log\ProjectListener.cs" />
     <Compile Include="Processor\UIAccessProcessor.cs" />
     <Compile Include="SMSReceivor\HttpTool.cs" />
+    <Compile Include="SMSReceivor\YMa.cs" />
+    <Compile Include="SMSReceivor\KMa.cs" />
+    <Compile Include="SMSReceivor\YPY.cs" />
+    <Compile Include="SMSReceivor\ZMa.cs" />
     <Compile Include="Utility\ADSLConnection.cs" />
     <Compile Include="IMGReceivor\CheckImage.cs" />
     <Compile Include="SMSReceivor\CheckPhone.cs" />

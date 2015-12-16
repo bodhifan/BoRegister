@@ -21,6 +21,8 @@ using System.Text.RegularExpressions;
 using OpenQA.Selenium.Interactions;
 using Utilities.Utility;
 using OpenQA.Selenium.Remote;
+using System.Runtime.Serialization.Formatters.Binary;
+using MouseKeyboardLibrary;
 
 namespace PayRegister
 {
@@ -37,10 +39,19 @@ namespace PayRegister
         UIAccessProcessor processControlor = null;
         StreamWriter writer = null;
 
+        
+
+        // IP地址规则
+        List<int> ipAddrList = new List<int>();
         int registerMode = 1;
 
         // 注册成功的号的个数
         int RegisterSucCnt = 0;
+        string clickEnventPath = @"clickenvent.bat";
+        List<MacroEvent> eventsForClick = new List<MacroEvent>();
+        string dragEnventPath = @"dragenvent.bat";
+        List<MacroEvent> eventsForDrag = new List<MacroEvent>();
+
         public Form1()
         {
             InitializeComponent();
@@ -49,36 +60,110 @@ namespace PayRegister
         {
             currentIp =  GetIP();
             AddrLabel.Text = "当前IP：" + currentIp;
-            CheckImageFactory.LoginAsyn();
+           // CheckImageFactory.LoginAsyn();
             processControlor = new UIAccessProcessor(ProjectLogHandler);
           //  processControlor.SetAsynCalling(false);
             // 定义处理流程
-             processControlor.AddHandler(InitDriver);
-            processControlor.AddHandler(InputEmail);
-            processControlor.AddHandler(TrigeImageCodeShow);
-            processControlor.AddHandler(CheckEmailStatus);
-            processControlor.AddHandler(DumpImageCodeToFile);
-            processControlor.AddHandler(InputImageCode);
-            processControlor.AddHandler(ClickNext);
-            processControlor.AddHandler(CheckReceviceStatus);
-            processControlor.AddHandler(ClickLoginButton);
-               processControlor.AddHandler(LoginEmail);
-               processControlor.AddHandler(FetchMail);
-               processControlor.AddHandler(GetRegisterAddr);
-               processControlor.AddHandler(SetPassword);
-   
-               processControlor.AddHandler(SetPayPassword); 
-               processControlor.AddHandler(SelectSecurityOption);
-               processControlor.AddHandler(CheckSuccessRegister); 
-               processControlor.AddHandler(CloseDriver);
-             processControlor.AddHandler(ReconnectNetwork);
-             processControlor.EndExcute("CloseDriver", 15);
-             processControlor.MakeCycle();
+          
 
             // 解析上次剩余的号
             ParseAccount();
+            ParseIPAddr();
+            ParseEvent(clickEnventPath, ref eventsForClick);
+            ParseEvent(dragEnventPath, ref eventsForDrag);
         }
 
+        private void ParseEvent(string clickEnventPath, ref List<MacroEvent> envent)
+        {
+            envent.Clear();
+            if (!File.Exists(clickEnventPath))
+            {
+                return;
+            }
+            FileStream fs = new FileStream(clickEnventPath, FileMode.Open);
+            BinaryFormatter bf = new BinaryFormatter();
+            envent = bf.Deserialize(fs) as List<MacroEvent>;
+            fs.Close();
+        }
+
+        private void ExcuteEvent(List<MacroEvent> events)
+        {
+
+            foreach (MacroEvent macroEvent in events)
+            {
+
+                Thread.Sleep(macroEvent.TimeSinceLastEvent);
+
+                switch (macroEvent.macroEventType)
+                {
+                    case MacroEventType.MouseMove:
+                        {
+
+                            MouseEventArgs mouseArgs = (MouseEventArgs)macroEvent.EventArgs;
+
+                            MouseSimulator.X = mouseArgs.X;
+                            MouseSimulator.Y = mouseArgs.Y;
+
+                        }
+                        break;
+                    case MacroEventType.MouseDown:
+                        {
+
+                            MouseEventArgs mouseArgs = (MouseEventArgs)macroEvent.EventArgs;
+
+                            MouseSimulator.MouseDown(mouseArgs.Button);
+
+                        }
+                        break;
+                    case MacroEventType.MouseUp:
+                        {
+
+                            MouseEventArgs mouseArgs = (MouseEventArgs)macroEvent.EventArgs;
+
+                            MouseSimulator.MouseUp(mouseArgs.Button);
+
+                        }
+                        break;
+                    case MacroEventType.KeyDown:
+                        {
+
+                            KeyEventArgs keyArgs = (KeyEventArgs)macroEvent.EventArgs;
+
+                            KeyboardSimulator.KeyDown(keyArgs.KeyCode);
+
+                        }
+                        break;
+                    case MacroEventType.KeyUp:
+                        {
+
+                            KeyEventArgs keyArgs = (KeyEventArgs)macroEvent.EventArgs;
+
+                            KeyboardSimulator.KeyUp(keyArgs.KeyCode);
+
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+
+        }
+
+        string bIpAddr = @"Ip.txt";
+        private void ParseIPAddr()
+        {
+            // 剩余的号
+            ipAddrList.Clear();
+            if (!File.Exists(bIpAddr))
+            {
+                return;
+            }
+            FileStream fs = new FileStream(GlobalSettings.getInstance().adslGap+bIpAddr, FileMode.Open);
+            BinaryFormatter bf = new BinaryFormatter();
+            ipAddrList = bf.Deserialize(fs) as List<int>;
+            fs.Close();
+        }
         private void ParseAccount()
         {  
             // 剩余的号
@@ -103,12 +188,58 @@ namespace PayRegister
         }
         private void button1_Click(object sender, EventArgs e)
         {
+            InitProcessControl();
+            if (radioBtnB.Checked && GlobalSettings.getInstance().adslGap == "C"
+                || radioBtnC.Checked && GlobalSettings.getInstance().adslGap == "B")
+            {
+                if (radioBtnB.Checked)
+                {
+                    GlobalSettings.getInstance().adslGap = "B";
+                    DumpIpAddr();
+                    ParseIPAddr();
+                }
+                else if (radioBtnC.Checked)
+                {
+                    GlobalSettings.getInstance().adslGap = "C";
+                    DumpIpAddr();
+                    ParseIPAddr();
+                }
+              
+            }
             timer2.Start();
             RegisterSucCnt = 0;
             Thread th = new Thread(new ThreadStart(BeginRegister));
             th.SetApartmentState(ApartmentState.STA);
             th.Start();
 
+        }
+
+        private void InitProcessControl()
+        {
+            processControlor.Reset();
+            processControlor.AddHandler(InitDriver);
+            if (!cbEmailActivied.Checked)
+            {
+                processControlor.AddHandler(InputEmail,5000);
+//                 processControlor.AddHandler(TrigeImageCodeShow);
+//                 processControlor.AddHandler(DumpImageCodeToFile);
+//                 processControlor.AddHandler(InputImageCode);
+//                 processControlor.AddHandler(ClickNext);
+//                 processControlor.AddHandler(CheckReceviceStatus);
+                
+            }
+//             processControlor.AddHandler(Navigate2EmailPage);
+//             processControlor.AddHandler(LoginEmail);
+//             processControlor.AddHandler(FetchMail);
+//             processControlor.AddHandler(GetRegisterAddr);
+//             processControlor.AddHandler(SetPassword);
+//             processControlor.AddHandler(SetPayPassword);
+//             processControlor.AddHandler(SelectSecurityOption);
+//             processControlor.AddHandler(CheckSuccessRegister);
+//             processControlor.AddHandler(CloseDriver);
+//             processControlor.AddHandler(ReconnectNetwork);
+//             processControlor.EndExcute("CloseDriver", 15);
+//             processControlor.MakeCycle();
         }
         int loopTimes = 0;
         private bool InitDriver(Object sender, Object param)
@@ -119,6 +250,22 @@ namespace PayRegister
             }
             else
             {
+                try
+                {
+                    CheckImageFactory.LoginAsyn();
+                }
+                catch (System.Exception ex)
+                {
+                    OutMsg("登录图片验证码失败");
+                    processControlor.Stop();
+                    return true;
+                }
+
+                
+                // 杀死进程
+//                 ProcessUtility.KillProcess("chromedriver");
+//                 ProcessUtility.KillProcess("chrome");
+
                  if (!entities.HasNext())
                  {
                      loopTimes++;
@@ -130,14 +277,25 @@ namespace PayRegister
                      }
                      else
                      {
-                         entities.Clear();
-                         entities.AddList(failedAccountList);
-                         failedAccountList.Clear();
+                         // 不是邮箱激活模式，才对失败的号进行重复激活
+                         if (!cbEmailActivied.Checked)
+                         {
+                             entities.Clear();
+                             entities.AddList(failedAccountList);
+                             failedAccountList.Clear();
+                         }
+
                      }
 
                  }
                 try
                 {
+                    if (!entities.HasNext())
+                    {
+                        OutMsg("没有可利用的邮箱");
+                        processControlor.Stop();
+                        return true;
+                    }
                     if (registerMode == 1)
                     {
                         curEntity = entities.Next();
@@ -149,26 +307,27 @@ namespace PayRegister
                     statusBox.Clear();
 #endregion
 
-                    var driverService = ChromeDriverService.CreateDefaultService();
-                    driverService.HideCommandPromptWindow = true;
-                    //                 ChromeOptions options = new ChromeOptions();
-                    //                 options.BinaryLocation = @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe";
-                    var ios6ua = "https://memberprod.alipay.com/account/reg/index.htm";
-
-//                     DesiredCapabilities capabilities = DesiredCapabilities.chrome();
-//                     capabilities.setCapability("chrome.switches", );
-//                     WebDriver driver = new ChromeDriver(capabilities);
-                    string proxyString = "61.223.163.178:8888";
-                  var chromeOptions = new ChromeOptions();
-                 
+                
                   //chromeOptions.AddArgument("--refer=" + ios6ua);
                  // chromeOptions.AddArguments("--proxy-server="+proxyString);
-                    driver = new ChromeDriver(driverService, chromeOptions);
+                    driver = GetChromeDriver();
 
 
-                    driver.Manage().Timeouts().ImplicitlyWait(new TimeSpan(0, 0, 5));
-                    driver.Manage().Window.Size = new System.Drawing.Size(1000,driver.Manage().Window.Size.Height);
+                    driver.Manage().Timeouts().ImplicitlyWait(new TimeSpan(0, 0, 10));
 
+                    if (!chBrowserMode.Checked)
+                    {
+                        driver.Manage().Window.Size = new System.Drawing.Size(800, driver.Manage().Window.Size.Height);
+                    }
+                    if (chBrowserMode.Checked)
+                    {
+//                         driver.Navigate().GoToUrl("chrome://extensions-frame");
+//                         IWebElement checkbox = driver.FindElement(By.XPath("//*[@id=\"aapnijgdinlhnhlmodcfapnahmbfebeb\"]/div/div[1]/div[6]/div[1]/label/input"));
+//                         if (!checkbox.Selected)
+//                         {
+//                             checkbox.Click();
+//                         }
+                    }
                     // //reg.taobao.com/member/reg/h5/fill_email.htm
                     driver.Navigate().GoToUrl("https://memberprod.alipay.com/account/reg/enterpriseIndex.htm");
 
@@ -184,7 +343,28 @@ namespace PayRegister
             return true;
         }
 
-        private int confirmTimes = 5;
+        private IWebDriver GetFireFoxDriver()
+        {
+            return new FirefoxDriver();
+        }
+
+        private IWebDriver GetChromeDriver()
+        {
+            var driverService = ChromeDriverService.CreateDefaultService();
+            driverService.HideCommandPromptWindow = true;
+            //                 ChromeOptions options = new ChromeOptions();
+            //                 options.BinaryLocation = @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe";
+            string ios6ua = "Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/600.1.3 (KHTML, like Gecko) Version/8.0 Mobile/12A4345d Safari/600.1.4";
+            ChromeOptions chromeOptions = new ChromeOptions();
+            chromeOptions.AddArgument("--user-agent=" + ios6ua);
+            if (chBrowserMode.Checked)
+            {
+                chromeOptions.AddArgument("-incognito");
+            }
+            return new ChromeDriver(driverService, chromeOptions);
+        }
+
+        private int MAX_LOOP_TIMES = 4;
         private int curConfirmTimes = 0;
         private bool isRegisterSuc = true;
 
@@ -198,7 +378,7 @@ namespace PayRegister
             {
                 callingOnce = true;
                 curConfirmTimes++;
-                if (curConfirmTimes > confirmTimes)
+                if (curConfirmTimes > MAX_LOOP_TIMES)
                 {
                     isRegisterSuc = false;
                     callingOnce = true;
@@ -266,6 +446,7 @@ namespace PayRegister
                      FailedLabel.Text = failedAccountList.Count.ToString();
                  }
                  ReminderLabel.Text = entities.Reminder().ToString();
+                 DumpAccount();
                  driver.Quit();
             }
             return true;
@@ -296,39 +477,66 @@ namespace PayRegister
             }
             else
             {
-                callingOnce = true;
-                dailCnt++;
-                if (dailCnt % DailConfig.getInstance().dailGap == 0)
+                try
                 {
-                    // 自动拨号
-                    OutMsg("断线重拨，等待" + DailConfig.getInstance().waittingTime.ToString() + "秒...");
-                    DailConfig.getInstance().DisConnect();
-                    System.Threading.Thread.Sleep(DailConfig.getInstance().waittingTime * 1000);
-                    int rtn = DailConfig.getInstance().Connect();
-                    if (rtn == 0)
+                    callingOnce = true;
+                    dailCnt++;
+                    if (dailCnt % DailConfig.getInstance().dailGap == 0)
                     {
-                        OutMsg("重拨成功!");
+                        // 自动拨号
+                        OutMsg("断线重拨，等待" + DailConfig.getInstance().waittingTime.ToString() + "秒...");
+                        try
+                        {
+                            DailConfig.getInstance().DisConnect();
+                        }
+                        catch (System.Exception ex)
+                        {
+                            OutMsg("断开连接失败..." + ex.Message);
+                        }
+
+                        OutMsg("已断开连接");
+                        try
+                        {
+                            System.Threading.Thread.Sleep(DailConfig.getInstance().waittingTime * 1000);
+                        }
+                        catch (System.Exception ex)
+                        {
+                            OutMsg("等待失败");
+                        }
+                        OutMsg("启动连接...");
+                        int rtn = DailConfig.getInstance().Connect();
+                        if (rtn == 0)
+                        {
+                            OutMsg("重拨成功!");
+                        }
+                        else
+                        {
+                            OutMsg("重拨失败!,继续重拨...");
+                            callingOnce = false;
+                        }
+                        string temp = GetIP();
+                        if (temp.Equals(currentIp))
+                        {
+                            OutMsg("IP与上一次一样,继续重拨...");
+                            callingOnce = false;
+                        }
+                        if (!callingOnce)
+                        {
+                            return false;
+                        }
+                        currentIp = temp;
+                        dailCnt = 0;
+
+                        
                     }
-                    else
-                    {
-                        OutMsg("重拨失败!,继续重拨...");
-                        callingOnce = false;
-                    }
-                    string temp = GetIP();
-                    if (temp.Equals(currentIp))
-                    {
-                        OutMsg("IP与上一次一样,继续重拨...");
-                        callingOnce = false;
-                    }
-                    if (!callingOnce)
-                    {
-                        return false;
-                    }
-                    currentIp = temp;
-                    dailCnt = 0;
+
+                    AddrLabel.Text = "当前IP:" + currentIp;
                 }
-                
-                AddrLabel.Text = "当前IP:" + currentIp;
+                catch (System.Exception ex)
+                {
+                	
+                }
+               
             }
             return callingOnce;
         }
@@ -343,7 +551,13 @@ namespace PayRegister
             {
                 try
                 {
+                    if (imageMode == 1)
+                    {
+                        ClickElementByXpath("//*[@id=\"scale_submit\"]");
+                        
+                    }
                     ClickElementByXpath(RegisterXpath.NEXT_BUTTON);
+                        
                 }
                 catch (System.Exception ex)
                 {
@@ -356,11 +570,11 @@ namespace PayRegister
             return true;
         }
 
-        private bool ClickLoginButton(Object sender, Object param)
+        private bool Navigate2EmailPage(Object sender, Object param)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new AccessHandler(ClickLoginButton), sender, param);
+                this.Invoke(new AccessHandler(Navigate2EmailPage), sender, param);
             }
             else
             {
@@ -510,7 +724,7 @@ namespace PayRegister
 
                 curEntity.securityAns = AccountFactory.getInstance().getAccountRoles().GetRandomAccName();
                 IWebElement securityElement = driver.FindElement(By.XPath("//*[@id=\"protectPasswordKey\"]"));
-                InputKeys(securityElement, curEntity.securityAns);
+                securityElement.SendKeys(curEntity.securityAns);
                 
                 // 点击下一步
                 Thread.Sleep(500);
@@ -597,7 +811,12 @@ namespace PayRegister
         /// <param name="xpath"></param>
         private void ClickElementByXpath(string xpath)
         {
+            Point pnt = new Point();
+            MouseUtility.GetCursorPos(ref pnt);
             IWebElement element = driver.FindElement(By.XPath(xpath));
+            Point toPnt = GetElementPoint(element,new Point(element.Size.Width/2,element.Size.Height/2));
+            MouseUtility.MoveCursor(pnt, toPnt);
+            
             element.Click();
             Thread.Sleep(500);
         }
@@ -607,6 +826,7 @@ namespace PayRegister
             if (!CheckImageFactory.GetCheckImage().IsLoginFinshed())
             {
                 System.Threading.Thread.Sleep(1000);
+                OutMsg("图片验证码尚未登录");
                 WaitImageLoginFinished();
             }
         }
@@ -623,8 +843,17 @@ namespace PayRegister
                 try
                 {
                     callingOnce = true;
-                    IWebElement emailElement = driver.FindElement(By.XPath(RegisterXpath.EMAIL_INPUT));
-                    InputKeys(emailElement, curEntity.emailAccount);
+                   // IWebElement emailElement = driver.FindElement(By.XPath(RegisterXpath.EMAIL_INPUT));
+                   // OutMsg(emailElement.Text);
+                   // MouseUtility.DoCopy(curEntity.emailAccount);
+                   // MouseUtility.SetCursorPos(GetElementPoint(emailElement, new Point(100, 100)));
+                    ExcuteEvent(eventsForClick);
+
+               //     MouseUtility.DoCopy(curEntity.emailAccount);
+                  //  MouseUtility.DoPaste();
+                    MouseUtility.InputText(curEntity.emailAccount, SimulatorSettings.getInstance().GetInputGap());
+//                     Point pnt = GetElementPoint(emailElement,new Point(200, 20));
+//                     MouseUtility.ClickAtXY(pnt);
 
                     OutMsg(curEntity.ToString());
 
@@ -635,17 +864,23 @@ namespace PayRegister
                     processControlor.GotoHanlderUnit("CloseDriver", 1000);
                 }
 
+                currentTimes = 0;
+
               }
 
             return callingOnce;
 
         }
 
-        private bool TrigeImageCodeShow(Object sender, Object param)
+        private void InputKeysSimlator(IWebElement emailElement, string p)
+        {
+            
+        }
+        private bool PreTrigeImageCodeShow(Object sender, Object param)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new AccessHandler(TrigeImageCodeShow), sender, param);
+                this.Invoke(new AccessHandler(PreTrigeImageCodeShow), sender, param);
             }
             else
             {
@@ -657,12 +892,78 @@ namespace PayRegister
                     Point domPnt = GetDomPosition();
                     Point fromPnt = new Point(domPnt.X + dragElement.Location.X + dragElement.Size.Width / 2, domPnt.Y + dragElement.Location.Y + dragElement.Size.Height / 2);
                     SetChromeForegroundWindow();
-                    MouseUtility.DragAndDown(fromPnt, new Point(fromPnt.X + 300, fromPnt.Y));
-                    //Point toPnt = new Point(bkElement.Size.Width - dragElement.Size.Width,0);
-                    //OutMsg("length:" + toPnt.X);
-                    //Actions action = new Actions(driver);
-                    //action.DragAndDropToOffset(dragElement, toPnt.X, 0).Perform();
-                    //action.Release();
+//                     // MouseUtility
+                    int clickCnt = 2 + RandomGenerator.getRandom().Next(3);
+                    for (int i = 0; i < clickCnt; i++)
+                    {
+                        MouseUtility.ClickAtXY(new Point(fromPnt.X+350+i,fromPnt.Y+i));
+                       // MouseUtility.UpMouse();
+                    }
+
+                }
+                catch (System.Exception ex)
+                {
+                    processControlor.GotoHanlderUnit("CloseDriver", 1000);
+                }
+
+            }
+
+            return callingOnce;
+
+        }
+
+        Point fromPnt = Point.Empty;
+        Point toPnt = Point.Empty;
+        private bool TrigeImageCodeShow(Object sender, Object param)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new AccessHandler(TrigeImageCodeShow), sender, param);
+            }
+            else
+            {
+                try
+                {
+                    callingOnce = true;
+//                     IWebElement dragElement = driver.FindElement(By.XPath("//*[@id=\"_n1z\"]"));
+//                     IWebElement bkElement = driver.FindElement(By.XPath("//*[@id=\"_scale_text\"]"));
+//                     Point domPnt = GetDomPosition();
+//                     fromPnt = new Point(domPnt.X + dragElement.Location.X + dragElement.Size.Width / 2, domPnt.Y + dragElement.Location.Y + dragElement.Size.Height / 2);
+//                     
+
+                    /************************************************************************/
+                    /* 这里有个bug,在点击2-7次的时候，直接通过验证                          */
+                    /************************************************************************/
+//                     clickCnt = 7;
+//                     for (int i = 0; i < clickCnt; i++)
+//                     {
+//                         MouseUtility.SetCursorPos(fromPnt.X + 400, fromPnt.Y + bkElement.Size.Height / 2);
+//                         MouseUtility.ClickAtXY(new Point(fromPnt.X + 400, fromPnt.Y + bkElement.Size.Height / 2));
+//                         Thread.Sleep(100);
+//                     }
+                    
+                    
+ //                   OutMsg("点击次数：" + clickCnt.ToString());
+//                     MouseUtility.SetCursorPos(fromPnt.X, fromPnt.Y);
+//                    
+//                     Thread.Sleep(100);
+//                     MouseUtility.MoveCursor(fromPnt, new Point(fromPnt.X + bkElement.Size.Width, fromPnt.Y));
+
+//                     for (int i = 0; i < clickCnt; i++)
+//                     {
+//                         Point pnt = new Point(fromPnt.X + bkElement.Size.Width - i*10, fromPnt.Y - i*2);
+//                         MouseUtility.SetCursorPos(pnt.X, pnt.Y);
+//                         MouseUtility.ClickAtXY(pnt);
+//                        // MouseUtility.UpMouse();
+//                         Thread.Sleep(100);
+//                     }
+
+              //      toPnt = new Point(fromPnt.X + bkElement.Size.Width, fromPnt.Y);
+                    ExcuteEvent(eventsForDrag);
+//                     SetChromeForegroundWindow();
+// 
+//                     Thread th = new Thread(new ThreadStart(DragAndDrog));
+//                     th.Start();
 
                     OutMsg("drag done");
 
@@ -677,8 +978,14 @@ namespace PayRegister
             return callingOnce;
 
         }
+        private void DragAndDrog()
+        {
+             MouseUtility.DragAndDown(fromPnt, toPnt);
+            // MouseUtility.UpMouse();
+        }
 
         bool isIgnore = false;
+        int imageMode = 1; // 图片验证码模式，有两种模式，一种是点击字，第二种是输入4个英文和数字的验证码
         //CheckEmailStatus
         private bool CheckEmailStatus(Object sender, Object param)
         {
@@ -700,6 +1007,12 @@ namespace PayRegister
                         return true;
                     }
 
+
+
+//                     OutMsg("调用脚本刷新...");
+//                     IJavaScriptExecutor excutor = (IJavaScriptExecutor)driver;
+//                     excutor.ExecuteScript("__nc.reset();");
+
                 }
                 catch (System.Exception ex)
                 {
@@ -711,18 +1024,35 @@ namespace PayRegister
             return callingOnce;
 
         }
+        Point offset = new Point(15,3);
+
+        private void InputKeys(IWebElement email, string p, Point pnt)
+        {
+            SetChromeForegroundWindow();
+            Point fromPnt = new Point();
+            MouseUtility.GetCursorPos(ref fromPnt);
+            Point toPnt = GetElementPoint(email, pnt);
+            MouseUtility.MoveCursor(fromPnt, toPnt, SimulatorSettings.getInstance().GetMouseGap());
+            MouseUtility.ClickAtXY(toPnt);
+            MouseSimulator.Click(MouseButton.Left);
+            if (p.Length > 0)
+            {
+                MouseUtility.InputText(p, SimulatorSettings.getInstance().GetInputGap());
+            }
+
+        }
         private void InputKeys(IWebElement email, string p)
         {
-            Actions action = new Actions(driver);
-            action.MoveToElement(email);
-            email.Clear();
-            action.Click(email);
-
-            if (p.Length>0)
-            {
-                email.SendKeys(p);
-            }
+            InputKeys(email, p, offset);
             
+        }
+
+        private Point GetElementPoint(IWebElement email,Point offset)
+        {
+            ILocatable locale = (ILocatable)email;
+
+            Point pnt = GetDomPosition();
+            return new Point(pnt.X + locale.Coordinates.LocationInDom.X+offset.X, pnt.Y + locale.Coordinates.LocationInDom.Y+offset.Y);
         }
         Point clickPoint = Point.Empty;
         private bool InputImageCode(Object sender, Object param)
@@ -737,32 +1067,56 @@ namespace PayRegister
                 ScrollToTop();
                 if (!isImageCodeFinished)
                 {
+                    IWebElement inputElement = driver.FindElement(By.XPath("//*[@id=\"imgCaptcha\"]/div[1]/input"));
+                    //  inputElement.SendKeys(coords);
+                    Point elementPnt = GetElementPoint(inputElement, new Point(400, 10));
+
+                    MouseUtility.ClickAtXY(elementPnt);
                     OutMsg("尚未接收到验证坐标");
                     callingOnce = false;
                     return true;
                 }
-                string[] xy = coords.Split(new char[]{','});
-                if (xy.Length != 2)
+
+                if (imageMode == 1)
                 {
-                    OutMsg("获取图片验证码失败");
-                    return true;
+                    OutMsg("图片验证码：" + coords);
+                    IWebElement inputElement = driver.FindElement(By.XPath("//*[@id=\"imgCaptcha\"]/div[1]/input"));
+                  //  inputElement.SendKeys(coords);
+//                     Point elementPnt = GetElementPoint(inputElement,new Point(200,10));
+// 
+//                     MouseUtility.ClickAtXY(elementPnt);
+
+                    Thread.Sleep(100);
+
+                    InputKeys(inputElement, coords,new Point(50,10));
                 }
+                else
+                {
 
-                OutMsg("返回坐标：" + coords);
-                int x = (int)(Convert.ToInt32(xy[0])/scaleX);
-                int y = (int)((Convert.ToInt32(xy[1])-30)/scaleY);
 
-                IWebElement web = driver.FindElement(By.XPath("//*[@id=\"clickCaptcha\"]/div[2]/img"));
-                SetChromeForegroundWindow();                
-                domPnt = GetDomPosition();
-               // ScrollToTop();
-                clickPoint = new Point(domPnt.X + x + web.Location.X, domPnt.Y + y + web.Location.Y);
-                OutMsg(string.Format("X {0} Y {1}", clickPoint.X,clickPoint.Y));
-                SetChromeForegroundWindow();
+                    string[] xy = coords.Split(new char[] { ',' });
+                    if (xy.Length != 2)
+                    {
+                        OutMsg("获取图片验证码失败");
+                        return true;
+                    }
 
-                MouseUtility.SetCursorPos(clickPoint.X, clickPoint.Y);
-                MouseUtility.ClickAtXY(clickPoint);
-        
+                    OutMsg("返回坐标：" + coords);
+                    int x = (int)(Convert.ToInt32(xy[0]) / scaleX);
+                    int y = (int)((Convert.ToInt32(xy[1]) - 30) / scaleY);
+
+                    IWebElement web = driver.FindElement(By.XPath("//*[@id=\"clickCaptcha\"]/div[2]/img"));
+                    SetChromeForegroundWindow();
+                    domPnt = GetDomPosition();
+                    // ScrollToTop();
+                    clickPoint = new Point(domPnt.X + x + web.Location.X, domPnt.Y + y + web.Location.Y);
+                    OutMsg(string.Format("X {0} Y {1}", clickPoint.X, clickPoint.Y));
+                    SetChromeForegroundWindow();
+
+                    MouseUtility.SetCursorPos(clickPoint.X, clickPoint.Y);
+                    MouseUtility.ClickAtXY(clickPoint);
+                }
+                currentTimes = 0;
 //                 string imageCode =  CheckImageFactory.GetCheckImage().RecognizeByCodeTypeAndPath(Config.PATH_CHECKCODE_IMG, codeType);
 //                 OutMsg("图片验证码：" + imageCode);
 //                 image.Clear();
@@ -808,6 +1162,8 @@ namespace PayRegister
 
         float scaleX = 1.0f;
         float scaleY = 1.0f;
+
+        int currentTimes = 0;
         private bool DumpImageCodeToFile(Object sender, Object param)
         {
             if (this.InvokeRequired)
@@ -816,15 +1172,42 @@ namespace PayRegister
             }
             else
             {
+
+                if (++currentTimes >= MAX_LOOP_TIMES)
+                {
+                    OutMsg("保存验证码失败");
+                    processControlor.GotoHanlderUnit("CloseDriver", 1000);
+                    return true;
+                }
                 callingOnce = true;
                 try
                 {
+
+                    IWebElement imageCodeElement = driver.FindElement(By.XPath("//*[@id=\"register_no_captcha\"]/div"));
+                    OutMsg(imageCodeElement.Text);
+                    if (imageCodeElement.Text.Contains("验证通过"))
+                    {
+                        imageMode = 2;
+                        processControlor.GotoHanlderUnit("ClickNext", 1000);
+                        callingOnce = true;
+                        return true;
+                    }
+                    if (imageCodeElement.Text.Contains("出错了"))
+                    {
+                        OutMsg("刷新");
+                        IWebElement refreshElement = driver.FindElement(By.XPath("//*[@id=\"register_no_captcha\"]/div/a"));
+                        refreshElement.Click();
+                        callingOnce = false;
+                    }
+
                     IWebElement codeCheckIcon = driver.FindElement(By.XPath("//*[@id=\"_bg\"]"));
                     
                     if (codeCheckIcon == null || codeCheckIcon.Size.Width < 100)
                     {
                         callingOnce = false;
                     }
+
+
                 }
                 catch
                 {
@@ -840,35 +1223,46 @@ namespace PayRegister
                 }
                 try
                 {
-                    Bitmap topBmp = TakeScreenshot(By.XPath("//*[@id=\"_bg\"]"));
-                    Rectangle cropArea = new Rectangle(new Point(0, 0), new Size(200, 30));
-                    topBmp = topBmp.Clone(cropArea, topBmp.PixelFormat);
-                    topBmp.Save(@"top.jpg");
-                    topBmp.Dispose();
+                    imageMode = 2;
+                    IWebElement imageModeElment = driver.FindElement(By.XPath("//*[@id=\"_scale_text\"]"));
+                    if (imageModeElment.Text.Contains("请在下方输入验证码"))
+                    {
+                        imageMode = 1;
+                  //      OutMsg("刷新图片验证码");
+//                         IWebElement refreshElement = driver.FindElement(By.XPath("//*[@id=\"_btn_1\"]"));
+//                         Point refreshPnt = GetElementPoint(refreshElement, new Point(8, 2));
+//                        // MouseUtility.SetCursorPos(refreshPnt);
+//                         MouseUtility.ClickAtXY(refreshPnt);
+//                         //refreshElement.Click();
+// 
+//                         Thread.Sleep(500);
+                    }
 
-                    Bitmap buttomBmp = TakeScreenshot(By.XPath("//*[@id=\"clickCaptcha\"]/div[2]/img"));
-                    OutMsg("orgin X Y" + buttomBmp.Width.ToString() + " " + buttomBmp.Height.ToString());
-                    Bitmap targetBmp = new Bitmap(200, 200);
-
-                    scaleX = 200.0f / buttomBmp.Width;
-                    scaleY = 200.0f / buttomBmp.Height;
-
-                    Graphics g = Graphics.FromImage(targetBmp);
-                    g.DrawImage(buttomBmp, new Rectangle(0, 0, 200, 200), new Rectangle(0, 0, buttomBmp.Width, buttomBmp.Height), GraphicsUnit.Pixel);
-                    targetBmp.Save(@"buttom.jpg");
-                    targetBmp.Dispose();
-                    buttomBmp.Dispose();
-
-                    // 提交图片验证码
-                    isImageCodeFinished = false;
-                    Thread th = new Thread(new ThreadStart(SubmitImageCode));
-                    th.Start();
+                    bool flag = true;
+                    if (imageMode == 2)
+                    {
+                        OutMsg("DumpImageCodeToFileByClickChar");
+                       flag = DumpImageCodeToFileByClickChar();
+                    }
+                    else if (imageMode == 1)
+                    {
+                        OutMsg("DumpImageCodeToFileByInputChar");
+                        flag = DumpImageCodeToFileByInputChar();
+                    }
+                    
+                    if (flag == false)
+                    {
+                        OutMsg("尝试保存验证码失败");
+                        callingOnce = false;
+                        return true;
+                    }
                     return true;
                 }
                 catch (System.Exception ex)
                 {
-                    OutMsg("保存验证码失败");
-                    processControlor.GotoHanlderUnit("CloseDriver", 1000);
+                    OutMsg("尝试保存验证码失败" + ex.Message);
+                    callingOnce = false;
+                    return true;
                 }
                 
             }
@@ -876,26 +1270,96 @@ namespace PayRegister
 
 
         }
+
+        private bool DumpImageCodeToFileByInputChar()
+        {
+            Bitmap bitmap = TakeScreenshot(By.XPath("//*[@id=\"_imgCaptcha_img\"]/img"));
+            bitmap.Save("1.jpg");
+            bitmap.Dispose();
+            OutMsg("保存验证码成功");
+            // 检查图片是否正确
+            if (!Utilities.Utiliy.IsImageVaild("1.jpg"))
+            {
+                OutMsg("图片验证码错误!");
+                // 不用使用邮箱注册,跳转到不用使用邮箱的step
+                processControlor.GotoHanlderUnit("CloseDriver", 1000);
+                return false;
+            }
+
+            // 提交图片验证码
+            isImageCodeFinished = false;
+            Thread th = new Thread(new ThreadStart(SubmitImageCode));
+            th.Start();
+            return true;
+        }
+
+        private bool DumpImageCodeToFileByClickChar()
+        {
+           // GC.Collect();
+            Bitmap topBmp = TakeScreenshot(By.XPath("//*[@id=\"_bg\"]"));
+            Rectangle cropArea = new Rectangle(new Point(0, 0), new Size(200, 30));
+            topBmp = topBmp.Clone(cropArea, topBmp.PixelFormat);
+            topBmp.Save(@"top.jpg");
+            topBmp.Dispose();
+
+            Bitmap buttomBmp = TakeScreenshot(By.XPath("//*[@id=\"clickCaptcha\"]/div[2]/img"));
+            OutMsg("orgin X Y" + buttomBmp.Width.ToString() + " " + buttomBmp.Height.ToString());
+            Bitmap targetBmp = new Bitmap(200, 200);
+
+            scaleX = 200.0f / buttomBmp.Width;
+            scaleY = 200.0f / buttomBmp.Height;
+
+            Graphics g = Graphics.FromImage(targetBmp);
+            g.DrawImage(buttomBmp, new Rectangle(0, 0, 200, 200), new Rectangle(0, 0, buttomBmp.Width, buttomBmp.Height), GraphicsUnit.Pixel);
+            targetBmp.Save(@"buttom.jpg");
+            targetBmp.Dispose();
+            buttomBmp.Dispose();
+
+           // GC.Collect();
+            // 提交图片验证码
+            isImageCodeFinished = false;
+            Thread th = new Thread(new ThreadStart(SubmitImageCode));
+            th.Start();
+
+            return true;
+        }
         bool isImageCodeFinished = false;
         string coords = "";// 图片验证码结果
         private void SubmitImageCode()
         {
             WaitImageLoginFinished();
-            ImageUtility.CombinImage(@"top.jpg", @"buttom.jpg", Config.PATH_CHECKCODE_IMG);
+            if (imageMode == 2)
+            {
+                ImageUtility.CombinImage(@"top.jpg", @"buttom.jpg", Config.PATH_CHECKCODE_IMG);
+            }
             int codeType = Convert.ToInt32(AccountFactory.getInstance().getImageCodeAcc().ProjID);
+            if (imageMode == 1)
+            {
+                if (AccountFactory.getInstance().getImageCodeAcc().PlatformName=="RK")
+                {
+                    codeType = 3040;
+                }
+                else
+                {
+                    codeType = 1004;
+                }
+            }
             coords = CheckImageFactory.GetCheckImage().RecognizeByCodeTypeAndPath(Config.PATH_CHECKCODE_IMG, codeType);
             isImageCodeFinished = true;
         }
         public Bitmap TakeScreenshot(By by)
         {
-            // 1. Make screenshot of all screen
-            var screenshotDriver = driver as ITakesScreenshot;
-            Screenshot screenshot = screenshotDriver.GetScreenshot();
-            var bmpScreen = new Bitmap(new MemoryStream(screenshot.AsByteArray));
-            // 2. Get screenshot of specific element
-            IWebElement element = FindElement(by);
-            var cropArea = new Rectangle(element.Location, element.Size);
-            return bmpScreen.Clone(cropArea, bmpScreen.PixelFormat);
+             IWebElement element = FindElement(by);
+            Point pnt = GetElementPoint(element, Point.Empty);
+            return ImageUtility.CaptureScreen(pnt.X, pnt.Y, element.Size.Width, element.Size.Height);
+           //  1. Make screenshot of all screen
+//              var screenshotDriver = driver as ITakesScreenshot;
+//              Screenshot screenshot = screenshotDriver.GetScreenshot();
+//              var bmpScreen = new Bitmap(new MemoryStream(screenshot.AsByteArray));
+//              // 2. Get screenshot of specific element
+//              
+//              var cropArea = new Rectangle(element.Location, element.Size);
+//              return bmpScreen.Clone(cropArea, bmpScreen.PixelFormat);
         }
 
         private IWebElement FindElement(By by)
@@ -912,15 +1376,27 @@ namespace PayRegister
         private void button2_Click(object sender, EventArgs e)
         {
             timer2.Stop();
+            if (!isRegisterSuc)
+            {
+                failedAccountList.Add(curEntity);
+                FailedLabel.Text = failedAccountList.Count.ToString();
+            }
+            else
+            {
+                ++RegisterSucCnt;
+                SucLabel.Text = RegisterSucCnt.ToString();
+                OutputSuccAccount();
+            }
             processControlor.Stop();
         }
         string currentIp;
         private string GetIP()
         {
-            string tempip = "";
+            string tempip = "无网络";
             try
             {
                 WebRequest wr = WebRequest.Create("http://www.ip138.com/ips138.asp");
+                wr.Timeout = 5000;
                 Stream s = wr.GetResponse().GetResponseStream();
                 StreamReader sr = new StreamReader(s, Encoding.Default);
                 string all = sr.ReadToEnd(); //读取网站的数据
@@ -931,8 +1407,10 @@ namespace PayRegister
                 sr.Close();
                 s.Close();
             }
-            catch
+            catch(Exception ex)
             {
+                OutMsg("查询IP地址失败:" + ex.Message);
+               // DailConfig.getInstance().Connect();
             }
             return tempip;
         }
@@ -972,22 +1450,6 @@ namespace PayRegister
 
         }
 
-        private void button5_Click(object sender, EventArgs e)
-        {
-
-            timer1.Start();
-        }
-
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            int X = Convert.ToInt32(tbXCoord.Text.Trim());
-            int Y = Convert.ToInt32(tbYCoord.Text.Trim());
-            //  SetChromeForegroundWindow();
-            MouseUtility.SetCursorPos(X, Y);
-            MouseUtility.ClickAtXY(new Point(X, Y));
-            timer1.Stop();
-        }
-
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             GlobalSettings.getInstance().Save();
@@ -995,16 +1457,25 @@ namespace PayRegister
             DumpAccount();
         }
 
+        private void DumpIpAddr()
+        {
+            FileStream fs = new FileStream(GlobalSettings.getInstance().adslGap + bIpAddr, FileMode.Create);
+            BinaryFormatter bf = new BinaryFormatter();
+            bf.Serialize(fs, ipAddrList);
+            fs.Close();
+        }
         private void DumpAccount()
         {
             // 剩余的号
             List<AccountEntity> reminder = new List<AccountEntity>(entities.Reminder());
+            int remind = entities.GetIndex();
             while (entities.HasNext())
             {
                 reminder.Add(entities.Next());
             }
             AccountEntity.DoSerialize(reminder, @"reminder.bat");
             AccountEntity.DoSerialize(failedAccountList, @"failed.bat");
+            entities.SetIndex(remind);
         }
 
         private void btnClearAll_Click(object sender, EventArgs e)
@@ -1029,6 +1500,32 @@ namespace PayRegister
         {
             totalTimes += new TimeSpan(0, 0, 1);
             ConsumeTimesLabel.Text = string.Format("{0}:{1}:{2}:{3}", totalTimes.Days, totalTimes.Hours, totalTimes.Minutes, totalTimes.Seconds);
+        }
+
+        private void button3_Click_1(object sender, EventArgs e)
+        {
+            dailCnt = DailConfig.getInstance().dailGap -1;
+            ReconnectNetwork(null, null);
+        }
+
+        private void button4_Click_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            InputEmail(null, null);
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            DumpImageCodeToFileByClickChar();
+        }
+
+        private void statusBox_TextChanged(object sender, EventArgs e)
+        {
+
         }
 
     }

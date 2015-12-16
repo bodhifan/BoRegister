@@ -32,9 +32,12 @@ namespace Utilities
       public TimeSpan registerConsume;// 注册耗时
       [NonSerialized]
       public string registerIP;// 注册耗时
+      [NonSerialized]
+      public bool isSuc = false;
       public AccountEntity()
       {
           useCnt = 0;
+          isSuc = false;
       }
       static public AccountEntity getTmpInstance()
       {
@@ -45,7 +48,7 @@ namespace Utilities
       }
       public override string ToString()
       {
-          return string.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}|{7}|{8}",emailAccount,emailPasswd,phoneNum,acount,passwd,payPwd,securityAns,string.Format("{0}-{1}-{2}-{3}:{4}",registerTime.Month,
+          return string.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}|{7}|{8}",emailAccount,emailPasswd,phoneNum,acount,passwd,payPwd,securityAns,string.Format("{0}-{1} {2}:{3}:{4}",registerTime.Month,
               registerTime.Day,registerTime.Hour,registerTime.Minute,registerTime.Second),registerIP);
       }
       public string ToShortString()
@@ -130,6 +133,10 @@ namespace Utilities
         public void AddList(List<AccountEntity> entityList)
         {
             mEntities.AddRange(entityList);
+        }
+        public void Add(AccountEntity entity)
+        {
+            mEntities.Add(entity);
         }
         public int GetIndex()
         {

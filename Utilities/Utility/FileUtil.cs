@@ -7,6 +7,18 @@ using System.Collections.Specialized;
 
 namespace Utilities
 {
+    public class FileUtil
+    {
+        public static void WriteContentToFile(string content, string filePath)
+        {
+            using (StreamWriter write = new StreamWriter(filePath)) {
+
+                write.Write(content);
+                write.Flush();
+                write.Close();
+            }
+        }
+    }
     public class IniFiles
     {
         public string FileName; //INI文件名

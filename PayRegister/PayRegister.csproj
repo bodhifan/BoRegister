@@ -99,6 +99,10 @@
       <Project>{149DA907-D73E-46B6-94AC-7E2037BD2B13}</Project>
       <Name>Utilities</Name>
     </ProjectReference>
+    <ProjectReference Include="C:\Users\bofan\Downloads\MouseKeyboardLib2008\MouseKeyboardLibrary\MouseKeyboardLibrary\MouseKeyboardLibrary.csproj">
+      <Project>{F419622F-4D82-40A6-B4FB-3FE36579F018}</Project>
+      <Name>MouseKeyboardLibrary</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

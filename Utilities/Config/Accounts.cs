@@ -61,6 +61,7 @@ namespace Utilities
 
    public class ImgCheckAccount : Account
     {
+       public static string SectionName = "IMAGEACCOUNT";
        public override string GetSectionName()
        {
            return "IMAGEACCOUNT";

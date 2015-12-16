@@ -21,7 +21,8 @@ namespace PayRegister
         private void Parse()
         {
             input_gap = ConfigFactory.getInstance().ReadInteger("按键", INPUT_GAP, 200);
-            mouse_gap = ConfigFactory.getInstance().ReadInteger("按键", MOUSE_GAP, 5);
+            mouse_gap = ConfigFactory.getInstance().ReadInteger("按键", MOUSE_GAP, 1);
+            mouse_speed = ConfigFactory.getInstance().ReadInteger("按键", MOUSE_SPEED, 5);
         }
         public int GetGap()
         {
@@ -42,12 +43,15 @@ namespace PayRegister
             ConfigFactory.getInstance().WriteInteger("按键", X_GAP, x_gap);
             ConfigFactory.getInstance().WriteInteger("按键", INPUT_GAP, input_gap);
             ConfigFactory.getInstance().WriteInteger("按键", MOUSE_GAP, mouse_gap);
+            ConfigFactory.getInstance().WriteInteger("按键", MOUSE_SPEED, mouse_speed);
         }
         public static string X_GAP = "清除按钮偏移量";
         public static string INPUT_GAP = "键盘输入间隔";
-        public static string MOUSE_GAP = "鼠标移动速度";
+        public static string MOUSE_SPEED = "鼠标移动速度";
+        public static string MOUSE_GAP = "鼠标移动间隔";
         public int x_gap = 15;
         public int input_gap=200;
-        public int mouse_gap = 5;
+        public int mouse_gap = 1;
+        public int mouse_speed = 5;
     }
 }

@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Security.Cryptography;
 using System.Web;
 using Utilities.Factory;
+using Utilities.SMSReceivor;
 
 // 短信验证
 namespace Utilities
@@ -370,11 +371,11 @@ namespace Utilities
     }
 
     // 一码平台
-    public class YMSMS : SMSBase
+    public class YIMSMS : SMSBase
     {
         string url;
         HttpTool send;
-        public YMSMS(string userName, string pwd, string pid) :
+        public YIMSMS(string userName, string pwd, string pid) :
             base(userName, pwd, pid)
         {
             url = "http://www.yzm1.com/api/do.php";
@@ -1359,7 +1360,16 @@ namespace Utilities
                     smsInstance = new AimaSMS(user, passwd, "27");
                     break;
                 case "YM":
-                    smsInstance = new YMSMS(user, passwd, "1036");
+                    smsInstance = new YMSMS(user, passwd, "8299");
+                    break;
+                case "KM":
+                    smsInstance = new KMSMS(user, passwd, "125");
+                    break;
+                case "YPY":
+                    smsInstance = new YPYSMS(user, passwd, "3913");
+                    break;
+                case "ZM":
+                    smsInstance = new ZMSMS(user, passwd, "3102");
                     break;
                 default:
                     smsInstance = null;
@@ -1396,6 +1406,10 @@ namespace Utilities
         }
          private static void BeginLogin()
         {
+             if (smsInstance == null)
+             {
+                 GetSmsInstance();
+             }
             result = smsInstance.Login();
         }
     }

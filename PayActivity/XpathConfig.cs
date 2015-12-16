@@ -61,6 +61,7 @@ namespace PayRegister
         public static string LOGIN_BUTTON = "//*[@id=\"J_SubmitStatic\"]";
 
         // 当前tile名字 
+        // /html/body/div[1]/h1
         public static string CURRENT_TITLE_XPATH = "/html/body/div[1]/h1";
         public static string TITLE_FILL_USER_NAME = "补全淘宝会员名";
         public static string TITLE_IDENTITY_VERIFY = "身份验证";
